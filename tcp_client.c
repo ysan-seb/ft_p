@@ -1,32 +1,54 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
-
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
-int	main(int ac, char av)
+#define PORT 444
+
+int	main()
 {
-	int network_socket;
-	int connection_status;
-	char server_response[256];
-	struct sockaddr_in server_adress;
-	network_socket = socket(AF_INET, SOCK_STREAM, 0);
+	int clientSocket;
+	int ret;
+	struct sockaddr_in serverAddr;
+	char buffer[1024];
 
-	server_adress.sin_family = AF_INET;
-	server_adress.sin_port = htons(9002);
-	server_adress.sin_addr.s_addr = INADDR_ANY;
-
-	connection_status = connect(network_socket, (struct sockaddr *)&server_adress, sizeof(server_adress));
-	if (connection_status == -1)
+	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (clientSocket < 0)
 	{
-		printf("connection error\n");
-		return (-1);
+		printf("[-]Error in connection.\n");
+		exit(1);
 	}
-	recv(network_socket, &server_response, sizeof(server_response), 0);
-	printf("server: %s\n", server_response);
-	close(network_socket);
+	printf("[+]Client socket is created.\n");
+	memset(&serverAddr, 0, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(PORT);
+	serverAddr.sin_port = inet_addr("127.0.0.1");
+	ret = connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+	if (ret < 0)
+	{
+		printf("[-]Error in connection.\n");
+		exit(1);
+	}
+	printf("[+]Connected to Server.\n");
+	while (1)
+	{
+		printf("Client: \t");
+		scanf("%s", &buffer[0]);
+		send(clientSocket, buffer, strlen(buffer), 0);
+		if (strcmp(buffer, ":exit") == 0)
+		{
+			close(clientSocket);
+			printf("[-]Disconnected from server.\n");
+			exit(1);
+		}
+		if (recv(clientSocket, buffer, 1024, 0) < 0)
+			printf("[-]Error in receiving data.\n");
+		else
+			printf("Server: \t%s\n", buffer);
+	}
 	return (0);
 }
