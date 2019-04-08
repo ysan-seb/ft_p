@@ -23,10 +23,10 @@ int	main()
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 	{
-		printf("[-]Error in connection.\n");
+		printf("[\e[38;5;1m-\e[0m]Error in connection.\n");
 		exit(1);
 	}
-	printf("[+]Server socket is created.\n");
+	printf("[\e[38;5;2m+\e[0m]Server socket is created.\n");
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(PORT);
@@ -34,27 +34,27 @@ int	main()
     ret = bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     	if (ret < 0)
 	{
-		printf("[-]Error in binding.\n");
+		printf("[\e[38;5;1m-\e[0m]Error in binding.\n");
 		exit(1);
 	}
-    printf("[+]Bind to port.\n");
+    printf("[\e[38;5;2m+\e[0m]Bind to port.\n");
     if (listen(sockfd, 10) == 0)
         printf("Listening....\n");
     else
-        printf("[-]Error in binding.\n");
+        printf("[\e[38;5;1m-\e[0m]Error in binding.\n");
     while (1)
     {
         newSocket = accept(sockfd, (struct sockaddr*)&newAddr, &addr_size);
         if (newSocket < 0)
             exit(1);
         printf("Connection accepted from %s\n", inet_ntoa(newAddr.sin_addr));
-        if (childpid = fork() == 0)
+        if ((childpid = fork()) == 0)
         {
             close(sockfd);
             while (1)
             {
                 recv(newSocket, buffer, 1024, 0);
-                if (strcmp(buffer, ":exit") == 0)
+                if (strcmp(buffer, "exit") == 0)
                 {
                     printf("Disconnected from %s\n", inet_ntoa(newAddr.sin_addr));
                     break;
