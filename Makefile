@@ -13,25 +13,29 @@ FLAGS = -Wall -Werror -Wextra -g
 
 # HEADER = -I./inc
 
+LIBFT = libft/libft.a
+
 RM = rm -rf
 
-all	: $(C_NAME)
+all	: lib $(C_NAME) $(S_NAME)
+
+lib	:
+	@make -C libft/
 
 $(C_NAME):$(C_OBJS)
-	$(CC) $(FLAGS) -o $(C_NAME) $(C_OBJS) #$(HEADER)
-
-all	: $(S_NAME)
+	$(CC) $(FLAGS) -o $(C_NAME) $(C_OBJS) $(LIBFT)
 
 $(S_NAME):$(S_OBJS)
-	$(CC) $(FLAGS) -o $(S_NAME) $(S_OBJS) #$(HEADER)
-
+	$(CC) $(FLAGS) -o $(S_NAME) $(S_OBJS) $(LIBFT)
 %.o: %.c
 	gcc $(FLAGS) -o $@ -c  $< #$(HEADER)
 
 clean	:
+	@make -C libft/ clean
 	$(RM) $(C_OBJS) $(S_OBJS)
 
 fclean: clean
+	@make -C libft/ fclean
 	$(RM) $(C_NAME) $(S_NAME)
 
 re	:	fclean

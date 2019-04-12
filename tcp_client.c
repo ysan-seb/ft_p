@@ -9,46 +9,70 @@
 
 #define PORT 444
 
-int	main()
+void	error(char *msg)
 {
-	int clientSocket;
-	int ret;
-	struct sockaddr_in serverAddr;
-	char buffer[1024];
+	dprintf(2, "%s\n", msg);
+	exit(1);
+}
 
-	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (clientSocket < 0)
-	{
-		printf("[\e[38;5;1m-\e[0m]Error in connection.\n");
-		exit(1);
-	}
-	printf("[\e[38;5;2m+\e[0m]Client socket is created.\n");
+struct sockaddr_in get_sockaddr()
+{
+	struct sockaddr_in serverAddr;
+
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(PORT);
 	serverAddr.sin_port = inet_addr("127.0.0.1");
-	ret = connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
-	if (ret < 0)
-	{
-		printf("[\e[38;5;1m-\e[0m]Error in connection.\n");
-		exit(1);
-	}
+	return (serverAddr);
+}
+
+int	main()
+{
+	int i = 0;
+	char c;
+	int clientSocket;
+	struct sockaddr_in serverAddr;
+	char buffer[1024];
+
+	bzero(buffer, 1024);	
+	if ((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+		error("[\e[38;5;1m-\e[0m]Error in connection.");
+	printf("[\e[38;5;2m+\e[0m]Client socket is created.\n");
+
+	serverAddr = get_sockaddr();
+	
+	if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
+		error("[\e[38;5;1m-\e[0m]Error in connection.");
 	printf("[\e[38;5;2m+\e[0m]Connected to Server.\n");
+
 	while (1)
 	{
-		printf("ftp> ");
-		scanf("%s", &buffer[0]);
+		write(1, "ftp> ", 5);
+		while (read(0, &c, 1) > 0 && i < 1024)
+		{
+			if (c == '\n')
+				break;
+			if (c != '\t')
+				buffer[i++] = c;
+		}
+		i = 0;
 		send(clientSocket, buffer, strlen(buffer), 0);
-		if (strcmp(buffer, "exit") == 0)
+		if (strcmp(buffer, "quit") == 0)
 		{
 			close(clientSocket);
-			printf("Disconnected from server.\n");
+			printf("\e[3mDisconnected from server.\n");
 			exit(1);
 		}
 		if (recv(clientSocket, buffer, 1024, 0) < 0)
 			printf("[\e[38;5;1m-\e[0m]Error in receiving data.\n");
 		else
-			printf("Server: %s\n", buffer);
+		{
+			if (buffer[strlen(buffer) - 1] != '\n')
+				printf("%s\n", buffer);
+			else
+				printf("%s", buffer);
+		}
+		bzero(buffer, 1024);
 	}
 	return (0);
 }
