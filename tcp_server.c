@@ -60,6 +60,7 @@ void pwd(int newSocket)
 
     getcwd(buffer, 1024);
     send(newSocket, buffer, strlen(buffer), 0);
+    ft_bzero(buffer, sizeof(buffer));
 }
 
 int builtin(int newSocket, char *cmd)
