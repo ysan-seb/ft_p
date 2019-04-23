@@ -6,7 +6,7 @@
 /*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/23 22:05:19 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/23 23:27:02 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 void	usage(char *bin)
 {
@@ -55,12 +56,40 @@ int		main(int ac, char **av)
 {
 	int					port;
 	int					sock;
+	int					r;
+	char				buf[1024];
 
 	if (ac != 3)
 		usage(av[0]);
 	port = atoi(av[2]);
 	sock = create_client(av[1], port);
-	write(sock, "bonjour\n", 8);
+	while (1)
+	{
+		write(1, "ftp> ", 5);
+		if ((r = read(0, &buf, 1023)) < 0)
+			break;
+		if (r == 0)
+		{
+			close(sock);
+			printf("\e[3mDisconnected from server.\n");
+			exit(1);
+		}
+		buf[r] = '\0';
+		if (strlen(buf) > 0)
+		{
+			if (send(sock, buf, strlen(buf), 0) < 0)
+				break;;
+			if (recv(sock, buf, 1023, 0) < 0)
+				printf("[\e[38;5;1m-\e[0m]Error in receiving data.\n");
+			else
+			{
+				if (buf[strlen(buf) - 1] != '\n')
+					printf("%s\n", buf);
+				else
+					printf("%s", buf);
+			}
+		}
+	}
 	close(sock);
 	return (0);
 }

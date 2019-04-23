@@ -6,7 +6,7 @@
 /*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/23 22:09:38 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/23 23:27:25 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 void	usage(char *bin)
 {
@@ -64,16 +65,31 @@ int		main(int ac, char **av)
 	struct sockaddr_in	csin;
 	int					r;
 	char				buf[1024];
+	pid_t				child;
 
 	if (ac != 2)
 		usage(av[0]);
 	port = atoi(av[1]);
 	sock = create_server(port);
-	cs = accept(sock, (struct sockaddr*)&csin, &cslen);
-	while ((r = read(cs, buf, 1023)) > 0)
+	memset(&csin, 0, sizeof(csin));
+	while (1)
 	{
-		buf[r] = '\0';
-		printf("received %d bytes: [%s]\n", r, buf);
+		if ((cs = accept(sock, (struct sockaddr*)&csin, &cslen)) < 0)
+			break;
+		if ((child = fork()) == 0)
+		{
+			close(sock);
+			while (1)
+			{
+				if ((r = recv(cs, buf, 1023, 0)) < 0)
+					break;
+				buf[r] = '\0';
+				printf("%s", buf);
+				// -> check command and send result
+				if (send(cs, "good", 4, 0) < 0)
+					break;
+			}
+		}
 	}
 	close(cs);
 	close(sock);
