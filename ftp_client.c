@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ftp_client.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/23 23:27:02 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/24 23:57:44 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,14 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+#define CMD_MAX 1024
+
+typedef struct 	s_cmd
+{
+	char		str[CMD_MAX];
+	int			len;
+}				t_cmd;
+
 void	usage(char *bin)
 {
 	printf("Usage: %s <addr> <port>\n", bin);
@@ -28,7 +36,7 @@ void	usage(char *bin)
 void	error(char *err)
 {
 	dprintf(2, "%s\n", err);
-	exit(1);
+	exit(-1);
 }
 
 int		create_client(char *addr, int port)
@@ -41,53 +49,84 @@ int		create_client(char *addr, int port)
 	if (proto == 0)
 		return (-1);
 	if ((sock = socket(PF_INET, SOCK_STREAM, proto->p_proto)) < 0)
-		error("[\e[38;5;1m-\e[0m]Error in connection.");
-	printf("[\e[38;5;2m+\e[0m]Client socket is created.\n");
+		error("[\e[38;5;1mERROR\e[0m] Error in connection.");
+	printf("[\e[38;5;2mSUCCESS\e[0m] Client socket is created.\n");
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	sin.sin_addr.s_addr = inet_addr(addr);
 	if (connect(sock, (const struct sockaddr *)&sin, sizeof(sin)) < 0)
-		error("[\e[38;5;1m-\e[0m]Error in connection.");
-	printf("[\e[38;5;2m+\e[0m]Connected to Server.\n");
+		error("[\e[38;5;1mERROR\e[0m] Error in connection.");
+	printf("[\e[38;5;2mSUCCESS\e[0m] Connected to Server.\n");
 	return (sock);
+}
+
+t_cmd	command(int sock)
+{
+	t_cmd cmd;
+
+	memset(&cmd, 0, sizeof(cmd));
+	if ((cmd.len = read(0, &cmd.str, CMD_MAX - 1)) < 0)
+	{
+		close(sock);
+		exit(EXIT_FAILURE);
+	}
+	else if (!cmd.len)
+	{
+		close(sock);
+		printf("\e[3mDisconnected from server.\e[0m\n");
+		exit(EXIT_SUCCESS);
+	}
+	else
+	{
+		cmd.str[cmd.len] = '\0';
+		return (cmd);
+	}
+}
+
+void	send_command(int sock, t_cmd cmd)
+{
+	if (send(sock, cmd.str, cmd.len, 0) < 0)
+	{
+		close(sock);
+		exit(EXIT_SUCCESS);
+	}
+}
+
+void	recieve_result(int sock)
+{
+	t_cmd cmd;
+
+	if ((cmd.len = recv(sock, cmd.str, CMD_MAX, 0)) < 0)
+		error("[\e[38;5;1mERROR\e[0m] Error in receiving data.\n");
+	else
+	{
+		cmd.str[cmd.len] = '\0';
+		if (cmd.str[cmd.len - 1] != '\n')
+			printf("%s\n", cmd.str);
+		else
+			printf("%s", cmd.str);
+	}
 }
 
 int		main(int ac, char **av)
 {
 	int					port;
 	int					sock;
-	int					r;
-	char				buf[1024];
+	t_cmd				cmd;
 
 	if (ac != 3)
 		usage(av[0]);
 	port = atoi(av[2]);
-	sock = create_client(av[1], port);
+	if ((sock = create_client(av[1], port)) < 0)
+		return (-1);
 	while (1)
 	{
 		write(1, "ftp> ", 5);
-		if ((r = read(0, &buf, 1023)) < 0)
-			break;
-		if (r == 0)
+		cmd = command(sock);
+		if (cmd.len > 1 && cmd.str[0] != '\n')
 		{
-			close(sock);
-			printf("\e[3mDisconnected from server.\n");
-			exit(1);
-		}
-		buf[r] = '\0';
-		if (strlen(buf) > 0)
-		{
-			if (send(sock, buf, strlen(buf), 0) < 0)
-				break;;
-			if (recv(sock, buf, 1023, 0) < 0)
-				printf("[\e[38;5;1m-\e[0m]Error in receiving data.\n");
-			else
-			{
-				if (buf[strlen(buf) - 1] != '\n')
-					printf("%s\n", buf);
-				else
-					printf("%s", buf);
-			}
+			send_command(sock, cmd);
+			recieve_result(sock);
 		}
 	}
 	close(sock);

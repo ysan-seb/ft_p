@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ftp_server.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/23 23:27:25 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/24 01:11:24 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,15 +70,14 @@ int		main(int ac, char **av)
 	if (ac != 2)
 		usage(av[0]);
 	port = atoi(av[1]);
-	sock = create_server(port);
-	memset(&csin, 0, sizeof(csin));
+	if ((sock = create_server(port)) < 0)
+		return (-1);
 	while (1)
 	{
 		if ((cs = accept(sock, (struct sockaddr*)&csin, &cslen)) < 0)
 			break;
 		if ((child = fork()) == 0)
 		{
-			close(sock);
 			while (1)
 			{
 				if ((r = recv(cs, buf, 1023, 0)) < 0)
