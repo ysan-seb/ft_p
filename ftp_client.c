@@ -21,7 +21,7 @@
 
 #define CMD_MAX 1024
 
-typedef struct 	s_cmd
+typedef struct	s_cmd
 {
 	char		str[CMD_MAX];
 	int			len;
@@ -108,6 +108,18 @@ void	recieve_result(int sock)
 	}
 }
 
+int		local_command(int sock, t_cmd cmd)
+{
+	if (strcmp(cmd.str, "quit\n") == 0)
+	{
+		send(sock, "quit\n", 5, 0);
+		printf("\e[3mDisconnected from server.\e[0m\n");
+		close(sock);
+		exit(EXIT_SUCCESS);
+	}
+	return (0);
+}
+
 int		main(int ac, char **av)
 {
 	int					port;
@@ -123,10 +135,11 @@ int		main(int ac, char **av)
 	{
 		write(1, "ftp> ", 5);
 		cmd = command(sock);
-		if (cmd.len > 1 && cmd.str[0] != '\n')
+		if (cmd.len > 1 && cmd.str[0] != '\n' && !local_command(sock, cmd))
 		{
 			send_command(sock, cmd);
 			recieve_result(sock);
+			memset(&cmd.str, 0, CMD_MAX);
 		}
 	}
 	close(sock);
