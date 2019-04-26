@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/24 23:57:44 by maki             ###   ########.fr       */
+/*   Updated: 2019/04/27 00:15:01 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,19 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include "ft_p.h"
 
-#define CMD_MAX 1024
-
-typedef struct	s_cmd
+int		get_argument(char *cmd)
 {
-	char		str[CMD_MAX];
-	int			len;
-}				t_cmd;
+	int		i;
+
+	i = 0;
+	while (cmd[i] && !isblank(cmd[i]))
+		i++;
+	while (cmd[i] && isblank(cmd[i]))
+		i++;
+	return (i);
+}
 
 void	usage(char *bin)
 {
@@ -85,27 +90,60 @@ t_cmd	command(int sock)
 
 void	send_command(int sock, t_cmd cmd)
 {
+		printf("%d\n", __LINE__);
+	
 	if (send(sock, cmd.str, cmd.len, 0) < 0)
 	{
 		close(sock);
 		exit(EXIT_SUCCESS);
 	}
+	if (strncmp("get ", cmd.str, 4) == 0)
+	{
+		char bs[1024];
+		int size = 0;
+		cmd.str[cmd.len - 1] = 0;
+		int file = open(cmd.str + get_argument(cmd.str), O_WRONLY | O_CREAT , 0644);
+		if (recv(sock, bs, 1024, 0) < 0)
+			error("file problem");
+		size = atoi(bs);
+		char *m = malloc(sizeof(char) * size + 1);
+		if (recv(sock, m, size, 0) < 0)
+			error("file problem");
+		write(file, m, size);
+		free(m);
+		printf("%d\n", __LINE__);
+	}
+
 }
 
 void	recieve_result(int sock)
 {
 	t_cmd cmd;
 
+		printf("%d\n", __LINE__);
+
 	if ((cmd.len = recv(sock, cmd.str, CMD_MAX, 0)) < 0)
 		error("[\e[38;5;1mERROR\e[0m] Error in receiving data.\n");
+	else if (cmd.len == 0)
+		printf("%d\n", __LINE__);
 	else
 	{
+		printf("%d\n", __LINE__);
 		cmd.str[cmd.len] = '\0';
 		if (cmd.str[cmd.len - 1] != '\n')
 			printf("%s\n", cmd.str);
 		else
 			printf("%s", cmd.str);
 	}
+	// while ((cmd.len = recv(sock, cmd.str, CMD_MAX, 0)) > 0)
+	// {
+	// 	printf("SIZE %d\n", cmd.len);
+	// 	cmd.str[cmd.len] = '\0';
+	// 	if (cmd.str[cmd.len - 1] != '\n')
+	// 		printf("%s\n", cmd.str);
+	// 	else
+	// 		printf("%s", cmd.str);
+	// }
 }
 
 int		local_command(int sock, t_cmd cmd)
@@ -133,14 +171,26 @@ int		main(int ac, char **av)
 		return (-1);
 	while (1)
 	{
+		printf("%d\n", __LINE__);
+
 		write(1, "ftp> ", 5);
 		cmd = command(sock);
+		printf("%d\n", __LINE__);
+
 		if (cmd.len > 1 && cmd.str[0] != '\n' && !local_command(sock, cmd))
 		{
+		printf("%d\n", __LINE__);
+
 			send_command(sock, cmd);
-			recieve_result(sock);
+		printf("%d\n", __LINE__);
+
+			// recieve_result(sock);
+		printf("%d\n", __LINE__);
+
 			memset(&cmd.str, 0, CMD_MAX);
+			printf("%d\n", __LINE__);
 		}
+		printf("%d\n", __LINE__);
 	}
 	close(sock);
 	return (0);

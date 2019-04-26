@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: maki <maki@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/23 22:00:58 by ysan-seb          #+#    #+#              #
-#    Updated: 2019/04/23 22:03:51 by ysan-seb         ###   ########.fr        #
+#    Updated: 2019/04/26 13:32:15 by maki             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,12 @@ C_NAME = client
 S_NAME = server
 
 C_SRCS = ftp_client.c
-S_SRCS = ftp_server.c
+S_SRCS = ftp_server.c \
+		 ftp_usage.c \
+		 ftp_error.c \
+		 ftp_ls.c\
+		 ftp_cd.c \
+		 ftp_pwd.c \
 
 C_OBJS = $(C_SRCS:.c=.o)
 S_OBJS = $(S_SRCS:.c=.o)

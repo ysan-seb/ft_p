@@ -6,41 +6,22 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/25 23:21:16 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/26 19:23:15 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <limits.h>
-#include <ctype.h>
+#include "ft_p.h"
 
-#define CMD_MAX 1024
-#define ERROR "[\e[38;5;1mERROR\e[0m]\n"
-#define SUCCESS "[\e[38;5;2mSUCCESS\e[0m]\n"
-
-typedef struct	s_cmd
+int		get_argument(char *cmd)
 {
-	char		str[CMD_MAX];
-	int			len;
-}				t_cmd;
+	int		i;
 
-void	usage(char *bin)
-{
-	printf("Usage: %s <port>\n", bin);
-	exit(-1);
-}
-
-void	error(char *err)
-{
-	dprintf(2, "%s", err);
-	exit(-1);
+	i = 0;
+	while (cmd[i] && !isblank(cmd[i]))
+		i++;
+	while (cmd[i] && isblank(cmd[i]))
+		i++;
+	return (i);
 }
 
 int		create_server(int port)
@@ -68,84 +49,6 @@ int		create_server(int port)
 	return (sock);
 }
 
-typedef struct			s_client
-{
-	int					cs;
-	unsigned int		cslen;
-	struct sockaddr_in	csin;
-}						t_client;
-
-void	command_pwd(int client_socket)
-{
-	char	path[PATH_MAX];
-
-	getcwd(path, PATH_MAX);
-	send(client_socket, path, strlen(path), 0);
-}
-
-void	command_ls(int client_socket, t_cmd cmd)
-{
-	int 	i;
-	pid_t 	pidchild;
-	char	arg[1024];
-
-	i = 0;
-	memset(&arg, 0, 64);
-	while (cmd.str[i] && !isblank(cmd.str[i]))
-		i++;
-	while (cmd.str[i] && isblank(cmd.str[i]))
-		i++;
-	if (cmd.str[i] == '-')
-		strncat(arg, cmd.str + i, 1024);
-	else if (cmd.str[i] == '\0')
-		strncat(arg, ".", 1024);
-	else
-	{
-		send(client_socket, "?Invalid command.", 17, 0);
-		return;		
-	}
-	if ((pidchild = fork()) == 0)
-	{
-		dup2(client_socket, 1);
-		dup2(client_socket, 2);
-		execl("/bin/ls", "ls", arg, NULL);
-		exit(EXIT_SUCCESS);
-	}
-	else if (pidchild > 0)
-		wait(&pidchild);
-}
-
-void	command_cd(int client_socket, t_cmd cmd)
-{
-	int 		i;
-	char		path[PATH_MAX];
-	char		new_path[PATH_MAX];
-	static char	old_path[PATH_MAX];
-
-	i = 0;
-	if (!strlen(old_path))
-		getcwd(old_path, PATH_MAX);
-	if (strcmp(cmd.str, "cd") == 0)
-		return ;
-	while (cmd.str[i] && !isblank(cmd.str[i]))
-		i++;
-	while (cmd.str[i] && isblank(cmd.str[i]))
-		i++;
-	getcwd(path, PATH_MAX);
-	chdir(cmd.str + i);
-	getcwd(new_path, PATH_MAX);
-	if (!strstr(new_path, path))
-	{
-		send(client_socket, ERROR, strlen(ERROR), 0);
-		chdir(path);
-		return ;
-	} 
-	else {
-		strcpy(old_path, path);
-		send(client_socket, SUCCESS, strlen(SUCCESS), 0);
-	}
-}
-
 void	command_put(int client_socket, t_cmd cmd)
 {
 	(void)cmd;
@@ -155,7 +58,28 @@ void	command_put(int client_socket, t_cmd cmd)
 void	command_get(int client_socket, t_cmd cmd)
 {
 	(void)cmd;
-	send(client_socket, "get", 3, 0);
+	int file;
+	void *ptr;
+	struct stat st;
+	char tmp[1024];
+
+	if ((file = open(cmd.str + get_argument(cmd.str), O_RDONLY)) < 0)
+	{
+		send(client_socket, "Error with open.\n", 17, 0);
+		return ;
+	}
+	fstat(file, &st);
+	printf("size : %zu\n", st.st_size);
+	sprintf(tmp, "%ld", st.st_size);
+	send(client_socket, tmp, strlen(tmp), 0);
+	printf("%s\n", cmd.str + get_argument(cmd.str));
+	if ((ptr = mmap(0, st.st_size, PROT_READ , MAP_PRIVATE, file, 0)) == MAP_FAILED)
+		send(client_socket, "mmap error.\n", 12, 0);
+	printf("ptr : %p\n", ptr);
+	if (ptr) {
+		send(client_socket, ptr, st.st_size, 0);
+		printf("file send\n");
+	}
 }
 
 void	command_quit(int client_socket)
@@ -176,7 +100,7 @@ int		builtins(int client_socket, t_cmd cmd)
 		command_pwd(client_socket);	
 	else if (strcmp(cmd.str, "put") == 0)
 		command_put(client_socket, cmd);
-	else if (strcmp(cmd.str, "get") == 0)
+	else if (strcmp(cmd.str, "get") == 0 || strncmp(cmd.str, "get ", 4) == 0)
 		command_get(client_socket, cmd);	
 	else if (strcmp(cmd.str, "quit") == 0)
 		command_quit(client_socket);
@@ -196,6 +120,7 @@ int		main(int ac, char **av)
 	if (ac != 2)
 		usage(av[0]);
 	port = atoi(av[1]);
+	getcwd(cmd.home, PATH_MAX);
 	if ((sock = create_server(port)) < 0)
 		return (-1);
 	while (1)
