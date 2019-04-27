@@ -6,11 +6,18 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/26 19:23:15 by maki             ###   ########.fr       */
+/*   Updated: 2019/04/27 14:23:35 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
+
+# define CMD_ERROR "[\e[38;5;1mERROR\e[0m] Invalid command.\n"
+# define GET_OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Error with open.\n"
+# define GET_MMAP_ERROR "[\e[38;5;1mERROR\e[0m] Error with mmap.\n"
+# define GET_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
+# define FALSE "0"
+# define TRUE "1"
 
 int		get_argument(char *cmd)
 {
@@ -57,28 +64,60 @@ void	command_put(int client_socket, t_cmd cmd)
 
 void	command_get(int client_socket, t_cmd cmd)
 {
-	(void)cmd;
-	int file;
-	void *ptr;
+	int			file;
+	void		*ptr;
 	struct stat st;
-	char tmp[1024];
+	char		tmp[1024];
 
+	memset(&tmp, 0, 1024);
+	// Check command path
 	if ((file = open(cmd.str + get_argument(cmd.str), O_RDONLY)) < 0)
 	{
-		send(client_socket, "Error with open.\n", 17, 0);
+		send(client_socket, FALSE, strlen(FALSE), 0); // -> HEADER
+		send(client_socket, GET_OPEN_ERROR, strlen(GET_OPEN_ERROR), 0);
 		return ;
 	}
-	fstat(file, &st);
-	printf("size : %zu\n", st.st_size);
-	sprintf(tmp, "%ld", st.st_size);
-	send(client_socket, tmp, strlen(tmp), 0);
-	printf("%s\n", cmd.str + get_argument(cmd.str));
-	if ((ptr = mmap(0, st.st_size, PROT_READ , MAP_PRIVATE, file, 0)) == MAP_FAILED)
-		send(client_socket, "mmap error.\n", 12, 0);
-	printf("ptr : %p\n", ptr);
-	if (ptr) {
-		send(client_socket, ptr, st.st_size, 0);
-		printf("file send\n");
+	else
+	{
+		if (fstat(file, &st) < 0)
+		{
+			printf("fstat Error\n");
+			return ;
+		}
+		if ((st.st_mode & S_IFMT) == S_IFDIR)
+		{
+			send(client_socket, FALSE, strlen(FALSE), 0); // -> HEADER
+			send(client_socket, GET_OPEN_ERROR, strlen(GET_OPEN_ERROR), 0);
+			return ;
+		}
+		send(client_socket, TRUE, strlen(TRUE), 0); // -> HEADER 
+	}
+	printf("HERE\n");
+	recv(client_socket, tmp, 2, 0);	
+	if (strcmp(tmp, "OK") != 0) 
+		return ;
+	if (fstat(file, &st) < 0)
+	{
+		printf("fstat Error\n");
+		return ;
+	}
+	memset(&tmp, 0, 1024);
+	sprintf(tmp, "%lld", st.st_size);
+	send(client_socket, tmp, strlen(tmp), 0); // -> SIZE
+	memset(&tmp, 0, 1024);
+	recv(client_socket, tmp, 2, 0);
+	if (strcmp(tmp, "OK") == 0) {
+		if (st.st_size > 0)
+		{
+			if ((ptr = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, file, 0)) == MAP_FAILED)
+			{
+				send(client_socket, GET_MMAP_ERROR, strlen(GET_MMAP_ERROR), 0);
+				return ;
+			}
+			if (ptr)
+				send(client_socket, ptr, st.st_size, 0); // -> CONTENT
+		}
+		send(client_socket, GET_SUCCESS, strlen(GET_SUCCESS), 0);
 	}
 }
 
@@ -97,15 +136,15 @@ int		builtins(int client_socket, t_cmd cmd)
 	else if (strcmp(cmd.str, "ls") == 0 || strncmp(cmd.str, "ls ", 3) == 0)
 		command_ls(client_socket, cmd);
 	else if (strcmp(cmd.str, "pwd") == 0)
-		command_pwd(client_socket);	
+		command_pwd(client_socket);
 	else if (strcmp(cmd.str, "put") == 0)
 		command_put(client_socket, cmd);
 	else if (strcmp(cmd.str, "get") == 0 || strncmp(cmd.str, "get ", 4) == 0)
-		command_get(client_socket, cmd);	
+		command_get(client_socket, cmd);
 	else if (strcmp(cmd.str, "quit") == 0)
 		command_quit(client_socket);
 	else
-		send(client_socket, "?Invalid command.", 17, 0);
+		send(client_socket, CMD_ERROR, strlen(CMD_ERROR), 0);
 	return (0);
 }
 
@@ -135,10 +174,7 @@ int		main(int ac, char **av)
 					break ;
 				cmd.str[cmd.len] = '\0';
 				printf("%s", cmd.str);
-				// -> check command and send result
 				builtins(client.cs, cmd);
-				// if (send(client.cs, "good", 4, 0) < 0)
-				// 	break ;
 			}
 		}
 	}
