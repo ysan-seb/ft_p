@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/27 14:24:58 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/29 00:31:03 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,9 +115,10 @@ void	send_command(int sock, t_cmd cmd)
 				error("file problem");
 			send(sock, "OK", 2, 0);
 			file.conv[ret] = '\0';
-			if ((fd = open(cmd.str + get_argument(cmd.str), O_WRONLY | O_CREAT , 0644)) < 0)
+			if ((fd = open(cmd.str + get_argument(cmd.str), O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
 				error("fucking open");
 			file.size = atoi(file.conv);
+				printf("Good %zu\n", file.size);
 			if (file.size > 0)
 			{
 				file.content = malloc(sizeof(char) * (file.size + 1));
@@ -126,6 +127,7 @@ void	send_command(int sock, t_cmd cmd)
 				write(fd, file.content, file.size);
 				free(file.content);
 			}
+				send(sock, "OK", 2, 0);				
 			close(fd);
 		}
 	}

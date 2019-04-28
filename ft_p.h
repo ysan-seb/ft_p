@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_p.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/27 13:33:36 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/27 13:35:18 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/28 22:36:05 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,4 +63,5 @@ void					command_ls(int client_socket, t_cmd cmd);
 void					command_cd(int client_socket, t_cmd cmd);
 void					command_pwd(int client_socket);
 
+int    ftp_send_file(int sock, t_cmd cmd);
 #endif
