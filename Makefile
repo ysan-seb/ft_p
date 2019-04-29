@@ -13,14 +13,30 @@
 C_NAME = client
 S_NAME = server
 
-C_SRCS = ftp_client.c
+C_SRCS = ftp_client.c \
+		 ftp_usage.c \
+		 ftp_error.c \
+		 ftp_arg.c \
+		 ftp_local_command.c \
+		 ftp_get_file.c \
+		 ftp_send_file.c \
+		 ftp_request_status.c \
+		 ftp_listen_status.c \
+		 ftp_quit.c \
+
+
 S_SRCS = ftp_server.c \
 		 ftp_usage.c \
 		 ftp_error.c \
-		 ftp_ls.c\
+		 ftp_arg.c \
+		 ftp_ls.c \
 		 ftp_cd.c \
 		 ftp_pwd.c \
-		 ftp_send_file_header.c \
+		 ftp_get_file.c \
+		 ftp_send_file.c \
+		 ftp_request_status.c \
+		 ftp_listen_status.c \
+		 ftp_quit.c \
 
 C_OBJS = $(C_SRCS:.c=.o)
 S_OBJS = $(S_SRCS:.c=.o)

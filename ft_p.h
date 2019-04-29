@@ -48,17 +48,23 @@ typedef struct			s_cmd
 
 typedef struct			s_file
 {
-	char				open[1];
+	int					fd;
+	char				*name;
+	size_t				size;
 	char				content[1024];
 }						t_file;
 
-int						get_argument(char *cmd);
-
 void					usage(char *bin);
 void					error(char *err);
+int						local_command(int sock, t_cmd cmd);
 void					command_ls(int client_socket, t_cmd cmd);
 void					command_cd(int client_socket, t_cmd cmd);
 void					command_pwd(int client_socket);
-
+int						arg(char *cmd);
+char					*filename(char *cmd);
+int						ftp_request_status(int sock, char *status, int ret);
+int						ftp_listen_status(int sock);
+void					ftp_get_file(int sock, t_cmd cmd);
 int						ftp_send_file(int sock, t_cmd cmd);
+void					command_quit(int client_socket);
 #endif

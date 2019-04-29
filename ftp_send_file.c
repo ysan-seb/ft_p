@@ -23,37 +23,6 @@
 #define SENDING_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
 #define BUFF_SIZE 1024
 
-int		arg(char *cmd)
-{
-	int		i;
-
-	i = 0;
-	while (cmd[i] && !isblank(cmd[i]))
-		i++;
-	while (cmd[i] && isblank(cmd[i]))
-		i++;
-	return (i);
-}
-
-int		ftp_request_status(int sock, char *status, int ret)
-{
-	if (send(sock, status, strlen(status), 0) < 0)
-		error("Error with send.\n");
-	return (ret);
-}
-
-int		ftp_listen_status(int sock)
-{
-	char	status[3];
-
-	memset(&status, 0, 3);
-	if (recv(sock, status, 2, 0) < 0)
-		error("Error with recv.\n");
-	if (strcmp(status, "OK") == 0)
-		return (1);
-	return (0);
-}
-
 int		ftp_check_file_path(int sock, t_cmd cmd)
 {
 	int		ret;

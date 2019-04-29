@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/29 17:51:37 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/29 20:17:48 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,18 +19,6 @@
 #define FALSE "0"
 #define TRUE "1"
 #define BUFF_SIZE 1024
-
-int		get_argument(char *cmd)
-{
-	int		i;
-
-	i = 0;
-	while (cmd[i] && !isblank(cmd[i]))
-		i++;
-	while (cmd[i] && isblank(cmd[i]))
-		i++;
-	return (i);
-}
 
 int		create_server(int port)
 {
@@ -59,8 +47,9 @@ int		create_server(int port)
 
 void	command_put(int client_socket, t_cmd cmd)
 {
-	(void)cmd;
-	send(client_socket, "put", 3, 0);
+	printf("->\n");
+	ftp_get_file(client_socket, cmd);
+	printf("<-\n");
 }
 
 void	command_get(int client_socket, t_cmd cmd)
@@ -68,25 +57,19 @@ void	command_get(int client_socket, t_cmd cmd)
 	ftp_send_file(client_socket, cmd);
 }
 
-void	command_quit(int client_socket)
-{
-	send(client_socket, "quit", 4, 0);
-	close(client_socket);
-}
-
 int		builtins(int client_socket, t_cmd cmd)
 {
 	if (cmd.str[cmd.len - 1] == '\n')
 		cmd.str[cmd.len - 1] = '\0';
-	if (strcmp(cmd.str, "cd") == 0 || strncmp(cmd.str, "cd ", 3) == 0)
+	if (strncmp(cmd.str, "cd", 2) == 0)
 		command_cd(client_socket, cmd);
-	else if (strcmp(cmd.str, "ls") == 0 || strncmp(cmd.str, "ls ", 3) == 0)
+	else if (strncmp(cmd.str, "ls", 2) == 0)
 		command_ls(client_socket, cmd);
 	else if (strcmp(cmd.str, "pwd") == 0)
 		command_pwd(client_socket);
-	else if (strcmp(cmd.str, "put") == 0)
+	else if (strncmp(cmd.str, "put", 3) == 0)
 		command_put(client_socket, cmd);
-	else if (strcmp(cmd.str, "get") == 0 || strncmp(cmd.str, "get ", 4) == 0)
+	else if (strncmp(cmd.str, "get", 3) == 0)
 		command_get(client_socket, cmd);
 	else if (strcmp(cmd.str, "quit") == 0)
 		command_quit(client_socket);
@@ -101,7 +84,7 @@ int		main(int ac, char **av)
 	int					sock;
 	pid_t				child;
 	t_cmd				cmd;
-	t_client			client;
+	t_client			c;
 
 	if (ac != 2)
 		usage(av[0]);
@@ -111,23 +94,23 @@ int		main(int ac, char **av)
 		return (-1);
 	while (1)
 	{
-		if ((client.cs = accept(sock, (struct sockaddr*)&client.csin, &client.cslen)) < 0)
+		if ((c.cs = accept(sock, (struct sockaddr*)&c.csin, &c.cslen)) < 0)
 			break ;
 		if ((child = fork()) == 0)
 		{
 			while (1)
 			{
-				if ((cmd.len = recv(client.cs, cmd.str, CMD_MAX - 1, 0)) < 0)
+				if ((cmd.len = recv(c.cs, cmd.str, CMD_MAX - 1, 0)) < 0)
 					break ;
 				cmd.str[cmd.len] = '\0';
 				printf("%s", cmd.str);
-				builtins(client.cs, cmd);
+				builtins(c.cs, cmd);
 			}
 		}
 		// else
 		// 	wait(&child);
 	}
-	close(client.cs);
+	close(c.cs);
 	close(sock);
 	return (0);
 }
