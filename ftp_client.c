@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/27 14:24:58 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/29 17:55:41 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include "ft_p.h"
-# define BUFF_SIZE 1024
+
+#define BUFF_SIZE 1024
 
 int		get_argument(char *cmd)
 {
@@ -31,18 +32,6 @@ int		get_argument(char *cmd)
 	while (cmd[i] && isblank(cmd[i]))
 		i++;
 	return (i);
-}
-
-void	usage(char *bin)
-{
-	printf("Usage: %s <addr> <port>\n", bin);
-	exit(-1);
-}
-
-void	error(char *err)
-{
-	dprintf(2, "%s\n", err);
-	exit(-1);
 }
 
 int		create_client(char *addr, int port)
@@ -89,28 +78,42 @@ t_cmd	command(int sock)
 	}
 }
 
-char    *get_filename(char *cmd)
+char	*get_filename(char *cmd)
 {
-    char *chr;
-    char *filename;
+	char	*chr;
+	char	*filename;
 
-    chr = strrchr(cmd, '/');
-    if (!chr)
-        filename = cmd;
-    else
-        filename = cmd + (strlen(cmd) - strlen(chr)) + 1;
-    return (filename);
+	chr = strrchr(cmd, '/');
+	if (!chr)
+		filename = cmd;
+	else
+		filename = cmd + (strlen(cmd) - strlen(chr)) + 1;
+	return (filename);
+}
+
+void	error(char *err)
+{
+	dprintf(2, "%s", err);
+	exit(-1);
+}
+
+void	usage(char *bin)
+{
+	printf("Usage: %s <port>\n", bin);
+	exit(-1);
 }
 
 void	send_command(int sock, t_cmd cmd)
 {
-	int fd;
-	int ret;
-	size_t file_size;
-	t_file file;
-	char conv[64];
-	size_t fsize_cmp = 0;
+	int		fd;
+	int		ret;
+	size_t	file_size;
+	t_file	file;
+	char	conv[64];
+	size_t	fsize_cmp;
+
 	ret = 0;
+	fsize_cmp = 0;
 	file_size = 0;
 	memset(&conv, 0, 64);
 	memset(&file, 0, sizeof(file));
@@ -122,7 +125,7 @@ void	send_command(int sock, t_cmd cmd)
 	if (strncmp("get ", cmd.str, 4) == 0)
 	{
 		cmd.str[cmd.len - 1] = 0;
-		if ((ret = recv(sock, file.open , 1, 0)) < 0)
+		if ((ret = recv(sock, file.open, 1, 0)) < 0)
 			error("file problem");
 		if (file.open[0] == '0')
 			return ;
@@ -141,7 +144,7 @@ void	send_command(int sock, t_cmd cmd)
 					fsize_cmp += ret;
 					write(fd, file.content, ret);
 					if (fsize_cmp == file_size)
-						break;
+						break ;
 				}
 			}
 			send(sock, "OK", 2, 0);

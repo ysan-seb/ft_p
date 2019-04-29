@@ -6,19 +6,19 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/28 23:08:17 by maki             ###   ########.fr       */
+/*   Updated: 2019/04/29 17:51:37 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
 
-# define CMD_ERROR "[\e[38;5;1mERROR\e[0m] Invalid command.\n"
-# define GET_OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Error with open.\n"
-# define GET_MMAP_ERROR "[\e[38;5;1mERROR\e[0m] Error with mmap.\n"
-# define GET_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
-# define FALSE "0"
-# define TRUE "1"
-# define BUFF_SIZE 1024
+#define CMD_ERROR "[\e[38;5;1mERROR\e[0m] Invalid command.\n"
+#define GET_OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Error with open.\n"
+#define GET_MMAP_ERROR "[\e[38;5;1mERROR\e[0m] Error with mmap.\n"
+#define GET_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
+#define FALSE "0"
+#define TRUE "1"
+#define BUFF_SIZE 1024
 
 int		get_argument(char *cmd)
 {
@@ -66,32 +66,6 @@ void	command_put(int client_socket, t_cmd cmd)
 void	command_get(int client_socket, t_cmd cmd)
 {
 	ftp_send_file(client_socket, cmd);
-	// int fd;
-	// int size;
-	// struct stat st;
-	// char tmp[1024];
-	// char conv[64];
-
-	// memset(&tmp, 0, 1024);
-	// memset(&conv, 0, 64);
-	// fd = open(cmd.str + get_argument(cmd.str), O_RDONLY);
-	// fstat(fd, &st);
-	// send(client_socket, "1", 1, 0);
-	// recv(client_socket, tmp, 2, 0);
-	// memset(&tmp, 0, 1024);
-	// sprintf(conv, "%lld", st.st_size);
-	// send(client_socket, conv, strlen(conv), 0);
-	// recv(client_socket, tmp, 2, 0);
-	// memset(&tmp, 0, 1024);
-	// while ((size = read(fd, tmp, BUFF_SIZE - 1)) && size != -1)
-	// {
-	// 	send(client_socket, tmp, size, 0);
-	// 	memset(tmp, 0, BUFF_SIZE);
-	// }
-	// memset(&tmp, 0, BUFF_SIZE);
-	// recv(client_socket, tmp, 2, 0);
-	// send(client_socket, GET_SUCCESS, strlen(GET_SUCCESS), 0);
-	// close(fd);
 }
 
 void	command_quit(int client_socket)
