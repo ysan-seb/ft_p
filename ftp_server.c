@@ -18,6 +18,7 @@
 # define GET_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
 # define FALSE "0"
 # define TRUE "1"
+# define BUFF_SIZE 1024
 
 int		get_argument(char *cmd)
 {
@@ -65,63 +66,32 @@ void	command_put(int client_socket, t_cmd cmd)
 void	command_get(int client_socket, t_cmd cmd)
 {
 	ftp_send_file(client_socket, cmd);
-	// int			file;
-	// void		*ptr;
+	// int fd;
+	// int size;
 	// struct stat st;
-	// char		tmp[1024];
+	// char tmp[1024];
+	// char conv[64];
 
 	// memset(&tmp, 0, 1024);
-	// // Check command path
-	// if ((file = open(cmd.str + get_argument(cmd.str), O_RDONLY)) < 0)
-	// {
-	// 	send(client_socket, FALSE, strlen(FALSE), 0); // -> HEADER
-	// 	send(client_socket, GET_OPEN_ERROR, strlen(GET_OPEN_ERROR), 0);
-	// 	return ;
-	// }
-	// else
-	// {
-	// 	if (fstat(file, &st) < 0)
-	// 	{
-	// 		printf("fstat Error\n");
-	// 		return ;
-	// 	}
-	// 	if ((st.st_mode & S_IFMT) == S_IFDIR)
-	// 	{
-	// 		send(client_socket, FALSE, strlen(FALSE), 0); // -> HEADER
-	// 		send(client_socket, GET_OPEN_ERROR, strlen(GET_OPEN_ERROR), 0);
-	// 		return ;
-	// 	}
-	// 	send(client_socket, TRUE, strlen(TRUE), 0); // -> HEADER 
-	// }
-	// printf("HERE\n");
-	// recv(client_socket, tmp, 2, 0);	
-	// if (strcmp(tmp, "OK") != 0) 
-	// 	return ;
-	// if (fstat(file, &st) < 0)
-	// {
-	// 	printf("fstat Error\n");
-	// 	return ;
-	// }
-
-
-	// memset(&tmp, 0, 1024);
-	// sprintf(tmp, "%ld", st.st_size);
-	// send(client_socket, tmp, strlen(tmp), 0); // -> SIZE
-	// memset(&tmp, 0, 1024);
+	// memset(&conv, 0, 64);
+	// fd = open(cmd.str + get_argument(cmd.str), O_RDONLY);
+	// fstat(fd, &st);
+	// send(client_socket, "1", 1, 0);
 	// recv(client_socket, tmp, 2, 0);
-	// if (strcmp(tmp, "OK") == 0) {
-	// 	if (st.st_size > 0)
-	// 	{
-	// 		if ((ptr = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, file, 0)) == MAP_FAILED)
-	// 		{
-	// 			send(client_socket, GET_MMAP_ERROR, strlen(GET_MMAP_ERROR), 0);
-	// 			return ;
-	// 		}
-	// 		if (ptr)
-	// 			send(client_socket, ptr, st.st_size, 0); // -> CONTENT
-	// 	}
-	// 	send(client_socket, GET_SUCCESS, strlen(GET_SUCCESS), 0);
+	// memset(&tmp, 0, 1024);
+	// sprintf(conv, "%lld", st.st_size);
+	// send(client_socket, conv, strlen(conv), 0);
+	// recv(client_socket, tmp, 2, 0);
+	// memset(&tmp, 0, 1024);
+	// while ((size = read(fd, tmp, BUFF_SIZE - 1)) && size != -1)
+	// {
+	// 	send(client_socket, tmp, size, 0);
+	// 	memset(tmp, 0, BUFF_SIZE);
 	// }
+	// memset(&tmp, 0, BUFF_SIZE);
+	// recv(client_socket, tmp, 2, 0);
+	// send(client_socket, GET_SUCCESS, strlen(GET_SUCCESS), 0);
+	// close(fd);
 }
 
 void	command_quit(int client_socket)
@@ -180,6 +150,8 @@ int		main(int ac, char **av)
 				builtins(client.cs, cmd);
 			}
 		}
+		// else
+		// 	wait(&child);
 	}
 	close(client.cs);
 	close(sock);

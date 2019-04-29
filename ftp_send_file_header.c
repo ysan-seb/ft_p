@@ -1,5 +1,6 @@
 #include "ft_p.h"
 
+# define MISSING_ARG "[\e[38;5;1mERROR\e[0m] Argument is missing.\n"
 # define INVALID_PATH_FILE "[\e[38;5;1mERROR\e[0m] Invalid path file.\n"
 # define OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Can't open file.\n"
 # define FSTAT_ERROR "[\e[38;5;1mERROR\e[0m] Error with fstat.\n"
@@ -8,6 +9,7 @@
 # define ERROR "0"
 # define SUCCESS "1"
 # define SENDING_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
+# define BUFF_SIZE 1024
 
 
 int		arg(char *cmd)
@@ -24,7 +26,6 @@ int		arg(char *cmd)
 
 int    ftp_request_status(int sock, char *status, int ret)
 {
-    printf("%s\n", status);
     if (send(sock, status, strlen(status), 0) < 0)
         error("Error with send.\n");
     return (ret);
@@ -46,24 +47,28 @@ int     ftp_check_file_path(int sock, t_cmd cmd)
 {
     int     ret;
     char    *chr;
+    char    *path;
     char    old_pwd[PATH_MAX];
     char    new_pwd[PATH_MAX];
 
     ret = 0;
-    chr = strrchr(cmd.str, '/');
+    path = cmd.str + arg(cmd.str);
+    chr = strrchr(path, '/');
     if (chr)
-        cmd.str[strlen(cmd.str) - strlen(chr)] = 0;
+        path[strlen(path) - strlen(chr)] = 0;
+    else
+        return (1);
     getcwd(old_pwd, PATH_MAX);
-    chdir(cmd.str);
+    if (chdir(path) < 0)
+        return (ftp_request_status(sock, ERROR, 0));
     getcwd(new_pwd, PATH_MAX);
     if (strstr(new_pwd, cmd.home))
         ret = 1;
     else
         ret = 0;
     chdir(old_pwd);
-    printf("%s %s ret : %d\n", new_pwd, cmd.home, ret);
     if (!ret)
-        ftp_request_status(sock, ERROR, -1);
+        ftp_request_status(sock, ERROR, 0);
     return (ret);
 }
 
@@ -75,7 +80,6 @@ int     ftp_open_file(int sock, t_cmd cmd)
     char    *path;
 
     path = cmd.str + arg(cmd.str);
-    printf("path = %s\n", path);
     if ((fd = open(path, O_RDONLY)) < 0)
         return (ftp_request_status(sock, ERROR, -1));
     if (fstat(fd, &st) < 0)
@@ -84,7 +88,6 @@ int     ftp_open_file(int sock, t_cmd cmd)
         return (ftp_request_status(sock, ERROR, -1));
     if ((st.st_mode & S_IFMT) == S_IFLNK)
         return (ftp_request_status(sock, ERROR, -1));
-    printf("fd : %d -\n", fd);
     return (fd);
 }
 
@@ -95,28 +98,25 @@ size_t     ftp_send_file_size(int sock, int fd)
 
     if (fstat(fd, &st) < 0)
         error("Error with fstat");
-    sprintf(conv, "%ld", st.st_size);
+    sprintf(conv, "%lld", st.st_size);
     if (send(sock, conv, strlen(conv), 0) < 0)
         error("Error while sending status.");
     return (st.st_size);
 }
 
-void    ftp_send_file_content(int sock, int fd, size_t size)
+void    ftp_send_file_content(int sock, int fd)
 {
-    char *content;
-    
-    if (!(content = (char*)malloc(sizeof(char) * (size + 1))))
-        error("Error with malloc.\n");
-    printf("%p\n", content);
-	if (content)
-    {
-        if (read(fd, content, size) < 0)
-            error("Error with read.\n");
-        printf("ptr = %p\n", content);
-		if (send(sock, content, size, 0) < 0)
-            error("Error while sending file content.\n");
-        free(content);
-    }
+    int     size;
+    char    buff[BUFF_SIZE];
+    printf("Before send\n");
+    while ((size = read(fd, buff, BUFF_SIZE - 1)))
+	{
+        printf("->\n");
+        printf("Size : %d\n", size);
+		send(sock, buff, size, 0);
+		memset(buff, 0, BUFF_SIZE);
+        printf("<-\n");
+	}
 }
 
 int    ftp_send_file(int sock, t_cmd cmd)
@@ -124,8 +124,13 @@ int    ftp_send_file(int sock, t_cmd cmd)
     int fd;
     size_t file_size;
 
-    // if (!ftp_check_file_path(sock, cmd))
-    //     return (ftp_request_status(sock, INVALID_PATH_FILE, -1));
+    if (strlen(cmd.str + arg(cmd.str)) == 0)
+    {
+        ftp_request_status(sock, ERROR, 0);
+        return (ftp_request_status(sock, MISSING_ARG, -1));
+    }
+    if (!ftp_check_file_path(sock, cmd))
+        return (ftp_request_status(sock, INVALID_PATH_FILE, -1));
     if ((fd = ftp_open_file(sock, cmd)) < 0)
         return (ftp_request_status(sock, OPEN_ERROR, -1));
     else
@@ -135,9 +140,8 @@ int    ftp_send_file(int sock, t_cmd cmd)
     file_size = ftp_send_file_size(sock, fd);
     if (!ftp_listen_status(sock))
         error("Error while receiving status.\n");
-    printf("fd = %d size %zu\n", fd, file_size);
     if (file_size > 0)
-        ftp_send_file_content(sock, fd, file_size);
+        ftp_send_file_content(sock, fd);
     if (!ftp_listen_status(sock))
         error("Error while receiving status.\n");
     ftp_request_status(sock, SENDING_SUCCESS, 0);

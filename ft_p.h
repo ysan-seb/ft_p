@@ -49,10 +49,7 @@ typedef struct			s_cmd
 typedef struct			s_file
 {
 	char				open[1];
-	char				name[PATH_MAX];
-	char				conv[CNV_MAX];
-	size_t				size;
-	char				*content;
+	char				content[1024];
 }						t_file;
 
 int						get_argument(char *cmd);

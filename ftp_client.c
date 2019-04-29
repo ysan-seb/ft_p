@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/29 00:31:03 by maki             ###   ########.fr       */
+/*   Updated: 2019/04/27 14:24:58 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include "ft_p.h"
+# define BUFF_SIZE 1024
 
 int		get_argument(char *cmd)
 {
@@ -92,9 +93,13 @@ void	send_command(int sock, t_cmd cmd)
 {
 	int fd;
 	int ret;
+	size_t file_size;
 	t_file file;
-
+	char conv[64];
+	size_t fsize_cmp = 0;
 	ret = 0;
+	file_size = 0;
+	memset(&conv, 0, 64);
 	memset(&file, 0, sizeof(file));
 	if (send(sock, cmd.str, cmd.len, 0) < 0)
 	{
@@ -111,23 +116,28 @@ void	send_command(int sock, t_cmd cmd)
 		else
 		{
 			send(sock, "OK", 2, 0);
-			if ((ret = recv(sock, file.conv, CNV_MAX, 0)) < 0)
-				error("file problem");
+			recv(sock, conv, 64, 0);
+			file_size = atoi(conv);
+			printf("fileSize %zu\n", file_size);
 			send(sock, "OK", 2, 0);
-			file.conv[ret] = '\0';
-			if ((fd = open(cmd.str + get_argument(cmd.str), O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
+			printf("Filename: %s\n", cmd.str + get_argument(cmd.str));
+			if ((fd = open("test2", O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
 				error("fucking open");
-			file.size = atoi(file.conv);
-				printf("Good %zu\n", file.size);
-			if (file.size > 0)
+			if (file_size > 0)
 			{
-				file.content = malloc(sizeof(char) * (file.size + 1));
-				if (recv(sock, file.content, file.size, 0) < 0)
-					error("file problem");
-				write(fd, file.content, file.size);
-				free(file.content);
+				printf("Before While\n");
+				while ((ret = recv(sock, file.content, BUFF_SIZE - 1, 0)) && ret != -1)
+				{
+					printf("->\n");
+					fsize_cmp += ret;
+					write(fd, file.content, ret);
+					if (fsize_cmp == file_size)
+						break;
+					printf("<-\n");					
+				}
 			}
-				send(sock, "OK", 2, 0);				
+			send(sock, "OK", 2, 0);	
+			printf("END\n");
 			close(fd);
 		}
 	}
