@@ -89,6 +89,19 @@ t_cmd	command(int sock)
 	}
 }
 
+char    *get_filename(char *cmd)
+{
+    char *chr;
+    char *filename;
+
+    chr = strrchr(cmd, '/');
+    if (!chr)
+        filename = cmd;
+    else
+        filename = cmd + (strlen(cmd) - strlen(chr)) + 1;
+    return (filename);
+}
+
 void	send_command(int sock, t_cmd cmd)
 {
 	int fd;
@@ -115,29 +128,23 @@ void	send_command(int sock, t_cmd cmd)
 			return ;
 		else
 		{
+			if ((fd = open(get_filename(cmd.str + get_argument(cmd.str)), O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
+				error("fucking open");
 			send(sock, "OK", 2, 0);
 			recv(sock, conv, 64, 0);
 			file_size = atoi(conv);
-			printf("fileSize %zu\n", file_size);
 			send(sock, "OK", 2, 0);
-			printf("Filename: %s\n", cmd.str + get_argument(cmd.str));
-			if ((fd = open("test2", O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
-				error("fucking open");
 			if (file_size > 0)
 			{
-				printf("Before While\n");
 				while ((ret = recv(sock, file.content, BUFF_SIZE - 1, 0)) && ret != -1)
 				{
-					printf("->\n");
 					fsize_cmp += ret;
 					write(fd, file.content, ret);
 					if (fsize_cmp == file_size)
 						break;
-					printf("<-\n");					
 				}
 			}
-			send(sock, "OK", 2, 0);	
-			printf("END\n");
+			send(sock, "OK", 2, 0);
 			close(fd);
 		}
 	}

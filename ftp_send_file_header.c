@@ -108,14 +108,11 @@ void    ftp_send_file_content(int sock, int fd)
 {
     int     size;
     char    buff[BUFF_SIZE];
-    printf("Before send\n");
-    while ((size = read(fd, buff, BUFF_SIZE - 1)))
+
+    while ((size = read(fd, buff, BUFF_SIZE - 1)) && size != -1)
 	{
-        printf("->\n");
-        printf("Size : %d\n", size);
 		send(sock, buff, size, 0);
 		memset(buff, 0, BUFF_SIZE);
-        printf("<-\n");
 	}
 }
 
