@@ -1,25 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ftp_get_file_header.c                              :+:      :+:    :+:   */
+/*   ftp_signal.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/30 17:35:40 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/30 17:35:42 by ysan-seb         ###   ########.fr       */
+/*   Created: 2019/04/30 18:22:11 by ysan-seb          #+#    #+#             */
+/*   Updated: 2019/04/30 18:22:29 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
 
-int		ftp_get_file_header(int sock)
+void		ftp_signal(int sig)
 {
-	char	status[2];
-
-	memset(&status, 0, 2);
-	if (recv(sock, status, 1, 0) < 0)
-		error("Error with recv.\n");
-	if (status[0] == '0')
-		return (0);
-	return (1);
+	if (sig == SIGCHLD)
+		wait(0);
 }

@@ -14,6 +14,7 @@ C_NAME = client
 S_NAME = server
 
 C_SRCS = ftp_client.c \
+		 ftp_client_prompt.c \
 		 ftp_usage.c \
 		 ftp_error.c \
 		 ftp_arg.c \
@@ -28,8 +29,10 @@ C_SRCS = ftp_client.c \
 
 
 S_SRCS = ftp_server.c \
+		 ftp_fork.c \
 		 ftp_usage.c \
 		 ftp_error.c \
+		 ftp_signal.c \
 		 ftp_arg.c \
 		 ftp_ls.c \
 		 ftp_cd.c \

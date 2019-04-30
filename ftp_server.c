@@ -6,13 +6,11 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/30 02:42:55 by maki             ###   ########.fr       */
+/*   Updated: 2019/04/30 18:26:28 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
-
-# define PUT_ABORT "[\e[38;5;1mERROR\e[0m] Command put abort.\n"
 
 int		create_server(int port)
 {
@@ -43,7 +41,7 @@ int		command_put(int sock, t_cmd cmd)
 {
 	t_file	file;
 	int		size;
-	char buff[1024];
+	char	buff[1024];
 
 	file.name = filename(cmd.str + arg(cmd.str));
 	if ((file.fd = open(file.name, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
@@ -55,7 +53,7 @@ int		command_put(int sock, t_cmd cmd)
 		if (size == 1023)
 			continue;
 		else
-			break;
+			break ;
 	}
 	close(file.fd);
 	ftp_request_status(sock, PUT_SUCCESS, 0);
@@ -92,36 +90,18 @@ int		main(int ac, char **av)
 {
 	int					port;
 	int					sock;
-	pid_t				child;
-	t_cmd				cmd;
-	t_client			c;
 
 	if (ac != 2)
 		usage(av[0]);
 	port = atoi(av[1]);
-	getcwd(cmd.home, PATH_MAX);
 	if ((sock = create_server(port)) < 0)
 		return (-1);
+	signal(SIGCHLD, ftp_signal);
 	while (1)
 	{
-		if ((c.cs = accept(sock, (struct sockaddr*)&c.csin, &c.cslen)) < 0)
+		if (!ftp_fork(sock))
 			break ;
-		if ((child = fork()) == 0)
-		{
-			while (1)
-			{
-				memset(&cmd.str, 0, PATH_MAX);
-				if ((cmd.len = recv(c.cs, cmd.str, CMD_MAX - 1, 0)) < 0)
-					break ;
-				cmd.str[cmd.len] = '\0';
-				printf("%s\n", cmd.str);
-				builtins(c.cs, cmd);
-			}
-		}
-		// else
-		// 	wait(&child);
 	}
-	close(c.cs);
 	close(sock);
 	return (0);
 }

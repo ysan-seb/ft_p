@@ -1,25 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ftp_get_file_header.c                              :+:      :+:    :+:   */
+/*   ftp_fork.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/30 17:35:40 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/30 17:35:42 by ysan-seb         ###   ########.fr       */
+/*   Created: 2019/04/30 18:25:12 by ysan-seb          #+#    #+#             */
+/*   Updated: 2019/04/30 18:25:52 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
 
-int		ftp_get_file_header(int sock)
+int		ftp_fork(int sock)
 {
-	char	status[2];
+	pid_t		child;
+	t_cmd		cmd;
+	t_client	c;
 
-	memset(&status, 0, 2);
-	if (recv(sock, status, 1, 0) < 0)
-		error("Error with recv.\n");
-	if (status[0] == '0')
+	getcwd(cmd.home, PATH_MAX);
+	if ((c.cs = accept(sock, (struct sockaddr*)&c.csin, &c.cslen)) < 0)
 		return (0);
+	if ((child = fork()) == 0)
+	{
+		while (1)
+		{
+			memset(&cmd.str, 0, PATH_MAX);
+			if ((cmd.len = recv(c.cs, cmd.str, CMD_MAX - 1, 0)) < 0)
+			{
+				close(c.cs);
+				return (0);
+			}
+			cmd.str[cmd.len] = '\0';
+			printf("%s\n", cmd.str);
+			builtins(c.cs, cmd);
+		}
+	}
 	return (1);
 }
