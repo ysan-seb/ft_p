@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/30 02:40:56 by maki             ###   ########.fr       */
+/*   Updated: 2019/04/30 02:42:55 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ int		command_put(int sock, t_cmd cmd)
 			return ftp_request_status(sock, "ERROR command put aborted.\n", 0);
 		printf("filename\n");
 		printf("create file\n");
+		printf("file size\n");
 		printf("fill with file content\n");
 		printf("send status\n");
 		size_t	tmp;
