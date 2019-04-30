@@ -6,77 +6,80 @@
 #    By: maki <maki@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/23 22:00:58 by ysan-seb          #+#    #+#              #
-#    Updated: 2019/04/30 00:04:39 by maki             ###   ########.fr        #
+#    Updated: 2019/04/30 19:06:42 by ysan-seb         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 C_NAME = client
 S_NAME = server
 
-C_SRCS = ftp_client.c \
-		 ftp_client_prompt.c \
-		 ftp_usage.c \
-		 ftp_error.c \
-		 ftp_arg.c \
-		 ftp_local_command.c \
-		 ftp_get_file.c \
-		 ftp_send_file.c \
-		 ftp_open_file.c \
-		 ftp_request_status.c \
-		 ftp_listen_status.c \
-		 ftp_get_file_header.c \
-		 ftp_quit.c \
+SRC_PATH = ./src/
 
+C_SRCS = $(SRC_PATH)ftp_client.c \
+		 $(SRC_PATH)ftp_client_prompt.c \
+		 $(SRC_PATH)ftp_usage.c \
+		 $(SRC_PATH)ftp_error.c \
+		 $(SRC_PATH)ftp_arg.c \
+		 $(SRC_PATH)ftp_local_command.c \
+		 $(SRC_PATH)ftp_get_file.c \
+		 $(SRC_PATH)ftp_send_file.c \
+		 $(SRC_PATH)ftp_open_file.c \
+		 $(SRC_PATH)ftp_request_status.c \
+		 $(SRC_PATH)ftp_listen_status.c \
+		 $(SRC_PATH)ftp_get_file_header.c \
+		 $(SRC_PATH)ftp_quit.c \
 
-S_SRCS = ftp_server.c \
-		 ftp_fork.c \
-		 ftp_usage.c \
-		 ftp_error.c \
-		 ftp_signal.c \
-		 ftp_arg.c \
-		 ftp_ls.c \
-		 ftp_cd.c \
-		 ftp_pwd.c \
-		 ftp_get_file.c \
-		 ftp_send_file.c \
-		 ftp_open_file.c \
-		 ftp_request_status.c \
-		 ftp_listen_status.c \
-		 ftp_get_file_header.c \
-		 ftp_quit.c \
+S_SRCS = $(SRC_PATH)ftp_server.c \
+		 $(SRC_PATH)ftp_fork.c \
+		 $(SRC_PATH)ftp_usage.c \
+		 $(SRC_PATH)ftp_error.c \
+		 $(SRC_PATH)ftp_signal.c \
+		 $(SRC_PATH)ftp_arg.c \
+		 $(SRC_PATH)ftp_ls.c \
+		 $(SRC_PATH)ftp_cd.c \
+		 $(SRC_PATH)ftp_pwd.c \
+		 $(SRC_PATH)ftp_get_file.c \
+		 $(SRC_PATH)ftp_send_file.c \
+		 $(SRC_PATH)ftp_open_file.c \
+		 $(SRC_PATH)ftp_request_status.c \
+		 $(SRC_PATH)ftp_listen_status.c \
+		 $(SRC_PATH)ftp_get_file_header.c \
+		 $(SRC_PATH)ftp_quit.c \
 
 C_OBJS = $(C_SRCS:.c=.o)
+
 S_OBJS = $(S_SRCS:.c=.o)
 
 CC = gcc
 
-FLAGS = -fsanitize=address -g -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror
 
 HEADER = -I./inc
 
-#LIBFT = libft/libft.a
+LIBFT = libft/libft.a
 
 RM = rm -rf
 
 all	: lib $(C_NAME) $(S_NAME)
 
 lib	:
-#	@make -C libft/
+	@make -C libft/
 
 $(C_NAME):$(C_OBJS)
-	$(CC) $(FLAGS) -o $(C_NAME) $(C_OBJS) #$(LIBFT)
+	$(CC) $(FLAGS) -o $(C_NAME) $(C_OBJS) $(HEADER) $(LIBFT)
 
 $(S_NAME):$(S_OBJS)
-	$(CC) $(FLAGS) -o $(S_NAME) $(S_OBJS) #$(LIBFT)
-%.o: %.c
-	gcc $(FLAGS) -o $@ -c  $< #$(HEADER)
+	$(CC) $(FLAGS) -o $(S_NAME) $(S_OBJS) $(HEADER) $(LIBFT)
+
+%.o: %.c ./inc/ft_p.h ./inc/libft.h
+	gcc $(FLAGS) -o $@ -c  $< $(HEADER)
 
 clean	:
-#	@make -C libft/ clean
+	@make -C libft/ clean
 	$(RM) $(C_OBJS) $(S_OBJS)
 
 fclean: clean
-#	@make -C libft/ fclean
+	@make -C libft/ fclean
 	$(RM) $(C_NAME) $(S_NAME)
 
 re	:	fclean
