@@ -12,7 +12,7 @@
 
 #include "ft_p.h"
 
-#define BUFF_SIZE 1024
+// #define BUFF_SIZE 1024
 
 char	*filename(char *cmd)
 {
@@ -61,14 +61,12 @@ void		ftp_get_file(int sock, t_cmd cmd)
 	if (!ftp_get_file_header(sock))
 		return ;
 	file.name = filename(cmd.str + arg(cmd.str));
-	if ((file.fd = open(file.name, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
-		error("Error with open.\n");
-	if (send(sock, "OK", 2, 0) < 0)
-		error("Error with send.\n");
 	if ((file.size = ftp_get_file_size(sock)))
     {
         if (send(sock, "OK", 2, 0) < 0)
             error("Error with send.\n");
+		if ((file.fd = open(file.name, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
+			error("Error with open.\n");
 		ftp_get_file_content(sock, file);
     }
 	if (send(sock, "OK", 2, 0) < 0)

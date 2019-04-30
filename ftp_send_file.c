@@ -48,22 +48,24 @@ size_t	ftp_send_file_size(int sock, int fd)
 
 	if (fstat(fd, &st) < 0)
 		error("Error with fstat");
-	sprintf(conv, "%ld", st.st_size);
+	sprintf(conv, "%lld", st.st_size);
 	if (send(sock, conv, strlen(conv), 0) < 0)
 		error("Error while sending status.");
 	return (st.st_size);
 }
 
-void	ftp_send_file_content(int sock, int fd)
+void	ftp_send_file_content(int sock, size_t size, int fd)
 {
-	int		size;
-	char	buff[BUFF_SIZE];
+	void	*ptr;
 
-	while ((size = read(fd, buff, BUFF_SIZE - 1)) && size != -1)
-	{
-		send(sock, buff, size, 0);
-		memset(buff, 0, BUFF_SIZE);
-	}
+	if ((ptr = mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+		error("Error with mmap.\n");
+	if (!ftp_listen_status(sock))
+		error("Error while receiving status.\n");
+	if (send(sock, ptr, size, 0) < 0)
+		error("Error with send.\n");
+	if (munmap(ptr, size) < 0)
+		error("Error with munap.\n");
 	close(fd);
 }
 
@@ -72,7 +74,7 @@ int		ftp_send_file(int sock, t_cmd cmd)
 	int		fd;
 	size_t	file_size;
 
-	if (strlen(cmd.str + arg(cmd.str)) == 0)
+	if (strcmp(cmd.str, "get") == 0 || strlen(cmd.str + arg(cmd.str)) == 0)
 	{
 		ftp_request_status(sock, ERROR, 0);
 		return (ftp_request_status(sock, MISSING_ARG, -1));
@@ -83,13 +85,9 @@ int		ftp_send_file(int sock, t_cmd cmd)
 		return (ftp_request_status(sock, OPEN_ERROR, -1));
 	else
 		ftp_request_status(sock, SUCCESS, 0);
-	if (!ftp_listen_status(sock))
-		error("Error while receiving status.\n");
 	file_size = ftp_send_file_size(sock, fd);
-	if (!ftp_listen_status(sock))
-		error("Error while receiving status.\n");
 	if (file_size > 0)
-		ftp_send_file_content(sock, fd);
+		ftp_send_file_content(sock, file_size, fd);
 	if (!ftp_listen_status(sock))
 		error("Error while receiving status.\n");
 	ftp_request_status(sock, SENDING_SUCCESS, 0);

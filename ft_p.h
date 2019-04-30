@@ -54,13 +54,17 @@
 # define SUCCESS "1"
 # define SENDING_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
 
-#define CMD_ERROR "[\e[38;5;1mERROR\e[0m] Invalid command.\n"
-#define GET_OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Error with open.\n"
-#define GET_MMAP_ERROR "[\e[38;5;1mERROR\e[0m] Error with mmap.\n"
-#define GET_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
-#define FALSE "0"
-#define TRUE "1"
+# define CMD_ERROR "[\e[38;5;1mERROR\e[0m] Invalid command.\n"
+# define GET_OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Error with open.\n"
+# define GET_MMAP_ERROR "[\e[38;5;1mERROR\e[0m] Error with mmap.\n"
+# define GET_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
+# define FALSE "0"
+# define TRUE "1"
 
+# define STAT_ERROR "[\e[38;5;1mERROR\e[0m] Can't stat.\n"
+
+
+# define PUT_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] Command put success.\n"
 typedef struct			s_client
 {
 	int					cs;
@@ -96,7 +100,10 @@ int						ftp_listen_status(int sock);
 void					ftp_get_file(int sock, t_cmd cmd);
 int						ftp_send_file(int sock, t_cmd cmd);
 int						ftp_open_file(int sock, t_cmd cmd);
+int						ftp_get_file_size(int sock);
+void					ftp_get_file_content(int sock, t_file file);
 size_t					ftp_send_file_size(int sock, int fd);
+void					ftp_send_file_content(int sock, size_t size, int fd);
 int						ftp_get_file_header(int sock);
 void					command_quit(int client_socket);
 #endif

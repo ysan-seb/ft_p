@@ -7,7 +7,6 @@ int		ftp_open_file(int sock, t_cmd cmd)
 	char		*path;
 
 	path = cmd.str + arg(cmd.str);
-	printf("path = %s\n", path);
 	if ((fd = open(path, O_RDONLY)) < 0)
 		return (ftp_request_status(sock, ERROR, -1));
 	if (fstat(fd, &st) < 0)

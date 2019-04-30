@@ -46,6 +46,7 @@ t_cmd	command(int sock)
 	t_cmd cmd;
 
 	memset(&cmd, 0, sizeof(cmd));
+	memset(&cmd.str, 0, BUFF_SIZE);
 	if ((cmd.len = read(0, &cmd.str, CMD_MAX - 1)) < 0)
 	{
 		close(sock);
@@ -64,49 +65,61 @@ t_cmd	command(int sock)
 	}
 }
 
-// size_t	ftp_send_file_size(int sock, int fd)
-// {
-// 	struct stat	st;
-// 	char		conv[64];
-
-// 	if (fstat(fd, &st) < 0)
-// 		error("Error with fstat");
-// 	sprintf(conv, "%ld", st.st_size);
-// 	if (send(sock, conv, strlen(conv), 0) < 0)
-// 		error("Error while sending status.");
-// 	return (st.st_size);
-// }
- 
 int	send_command(int sock, t_cmd cmd)
 {
-	t_file file;
-	struct stat st;		
-	int			size;
-	char		buff[BUFF_SIZE];
-	
-	if (send(sock, cmd.str, cmd.len, 0) < 0)
-	{
-		close(sock);
-		exit(EXIT_SUCCESS);
-	}
-	if (strncmp("get", cmd.str, 3) == 0)
-		ftp_get_file(sock, cmd);
+	struct stat st;
+
 	if (strncmp("put", cmd.str, 3) == 0)
 	{
-		cmd.str[cmd.len - 1] = 0;
-		if ((file.fd = ftp_open_file(sock, cmd)) < 0)
-			return printf("%s", OPEN_ERROR);
-		if (fstat(file.fd, &st) < 0)
-			error("Error with stat");
-		file.size = st.st_size;		
-		printf("%zu %d\n", file.size, file.fd);
+		int		fd;
+		void 	*ptr;
 
-		while ((size = read(file.fd, buff, BUFF_SIZE - 1)) && size != -1)
+		cmd.str[cmd.len - 1] = 0;
+		if (strcmp(cmd.str, "put") == 0 || strlen(cmd.str + arg(cmd.str)) == 0)
 		{
-			send(sock, buff, size, 0);
-			memset(buff, 0, BUFF_SIZE);
+			printf("%s", MISSING_ARG);
+			return (-1);
 		}
-		close(file.fd);
+		if ((fd = open(cmd.str + arg(cmd.str), O_RDONLY)) < 0)
+		{
+			printf("%s", OPEN_ERROR);
+			return (-1);
+		}
+		if (fstat(fd, &st) < 0)
+		{
+			printf("%s", STAT_ERROR);
+			return (-1);
+		}
+		if ((st.st_mode & S_IFMT) == S_IFDIR)
+		{
+			printf("%s", IS_DIR);
+			return (-1);
+		}
+		if (send(sock, cmd.str, cmd.len, 0) < 0)
+			error("Error with send.\n");
+		printf("(%s)\n", cmd.str);
+		if (st.st_size > 0)
+		{
+			if ((ptr = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+				error("Error with mmap.\n");
+			if (send(sock, ptr, st.st_size, 0) < 0)
+				error("Error with send.\n");
+			if (munmap(ptr, st.st_size) < 0)
+				error("Error with munap.\n");
+			close(fd);
+		}
+		printf("%s",  SENDING_SUCCESS);
+		return (0);
+	}
+	else 
+	{
+		if (send(sock, cmd.str, cmd.len, 0) < 0)
+		{
+			close(sock);
+			exit(EXIT_SUCCESS);
+		}
+		if (strncmp("get", cmd.str, 3) == 0)
+			ftp_get_file(sock, cmd);
 	}
 	return (0);
 }
@@ -124,17 +137,21 @@ int		main(int ac, char **av)
 		return (-1);
 	while (1)
 	{
+		memset(&cmd, 0, sizeof(cmd));
+		memset(&cmd.str, 0, BUFF_SIZE);
 		write(1, "ftp> ", 5);
 		cmd = command(sock);
 		if (cmd.len > 1 && cmd.str[0] != '\n' && !local_command(sock, cmd))
 		{
-			send_command(sock, cmd);
-			memset(&cmd, 0, sizeof(cmd));
-			while ((cmd.len = read(sock, cmd.str, CMD_MAX)) > 0)
+			if (send_command(sock, cmd) >= 0)
 			{
-				write(1, cmd.str, cmd.len);
-				if (strstr(cmd.str, "SUCCESS") || strstr(cmd.str, "ERROR"))
-					break ;
+				memset(&cmd, 0, sizeof(cmd));
+				while ((cmd.len = read(sock, cmd.str, CMD_MAX)) > 0)
+				{
+					write(1, cmd.str, cmd.len);
+					if (strstr(cmd.str, "SUCCESS") || strstr(cmd.str, "ERROR"))
+						break ;
+				}
 			}
 		}
 	}

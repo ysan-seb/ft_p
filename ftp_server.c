@@ -12,6 +12,8 @@
 
 #include "ft_p.h"
 
+# define PUT_ABORT "[\e[38;5;1mERROR\e[0m] Command put abort.\n"
+
 int		create_server(int port)
 {
 	int					sock;
@@ -39,42 +41,25 @@ int		create_server(int port)
 
 int		command_put(int sock, t_cmd cmd)
 {
-	(void)cmd;
-	(void)sock;
-	// struct stat st;
-	// t_file 		file;
-		// char		*path;
-	char		buff[BUFF_SIZE];
-	int			size;
-	
-		if (!ftp_get_file_header(sock))
-			return ftp_request_status(sock, "ERROR command put aborted.\n", 0);
-		printf("filename\n");
-		printf("create file\n");
-		printf("file size\n");
-		printf("fill with file content\n");
-		printf("send status\n");
-		size_t	tmp;
+	t_file	file;
+	int		size;
+	char buff[1024];
 
-		tmp = 0;
-		while ((size = recv(sock, buff, BUFF_SIZE - 1, 0)) && size != -1)
-		{
-			tmp += size;
-			write(1, buff, size);
-			// if (tmp == file.size)
-			// 	break ;
-		}
-		
-		
-	
-
-	// filename
-	// destination
-	// content
-	
-
-
-	return ftp_request_status(sock, "SUCCESS command put has been executed.\n", 0);
+	file.name = filename(cmd.str + arg(cmd.str));
+	if ((file.fd = open(file.name, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0)
+		error("Error with open.\n");
+	while ((size = recv(sock, buff, 1023, 0)) > 0 && size != -1)
+	{
+		write(file.fd, buff, size);
+		memset(&buff, 0, 1024);
+		if (size == 1023)
+			continue;
+		else
+			break;
+	}
+	close(file.fd);
+	ftp_request_status(sock, PUT_SUCCESS, 0);
+	return (0);
 }
 
 void	command_get(int client_socket, t_cmd cmd)
@@ -125,10 +110,11 @@ int		main(int ac, char **av)
 		{
 			while (1)
 			{
+				memset(&cmd.str, 0, PATH_MAX);
 				if ((cmd.len = recv(c.cs, cmd.str, CMD_MAX - 1, 0)) < 0)
 					break ;
 				cmd.str[cmd.len] = '\0';
-				printf("%s", cmd.str);
+				printf("%s\n", cmd.str);
 				builtins(c.cs, cmd);
 			}
 		}
