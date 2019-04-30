@@ -14,6 +14,6 @@
 
 void	usage(char *bin)
 {
-	printf("Usage: %s <port>\n", bin);
+	ft_printf("Usage: %s <port>\n", bin);
 	exit(-1);
 }

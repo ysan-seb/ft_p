@@ -15,5 +15,5 @@
 void		ftp_signal(int sig)
 {
 	if (sig == SIGCHLD)
-		wait(0);
+		wait4(0, 0, 0, 0);
 }

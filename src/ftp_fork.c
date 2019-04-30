@@ -25,7 +25,7 @@ int		ftp_fork(int sock)
 	{
 		while (1)
 		{
-			memset(&cmd.str, 0, PATH_MAX);
+			ft_memset(&cmd.str, 0, PATH_MAX);
 			if ((cmd.len = recv(c.cs, cmd.str, CMD_MAX - 1, 0)) < 0)
 			{
 				close(c.cs);

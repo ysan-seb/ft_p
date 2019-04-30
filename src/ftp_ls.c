@@ -15,10 +15,11 @@
 void	command_ls(int client_socket, t_cmd cmd)
 {
 	int		i;
+	int		status;
 	pid_t	pidchild;
 	char	opt[64];
 
-	memset(&opt, 0, 64);
+	ft_memset(&opt, 0, 64);
 	i = arg(cmd.str);
 	if (cmd.str[i] == '-')
 		strncat(opt, cmd.str + i, 64);
@@ -26,7 +27,7 @@ void	command_ls(int client_socket, t_cmd cmd)
 		strncat(opt, ".", 64);
 	else
 	{
-		send(client_socket, LS_ERROR, strlen(LS_ERROR), 0);
+		send(client_socket, LS_ERROR, ft_strlen(LS_ERROR), 0);
 		return ;
 	}
 	if ((pidchild = fork()) == 0)
@@ -34,9 +35,8 @@ void	command_ls(int client_socket, t_cmd cmd)
 		dup2(client_socket, 1);
 		dup2(client_socket, 2);
 		execl("/bin/ls", "ls", opt, NULL);
-		exit(EXIT_SUCCESS);
 	}
 	else if (pidchild > 0)
-		wait(&pidchild);
-	send(client_socket, LS_SUCCESS, strlen(LS_SUCCESS), 0);
+		wait4(pidchild, &status, 0, 0);
+	send(client_socket, LS_SUCCESS, ft_strlen(LS_SUCCESS), 0);
 }

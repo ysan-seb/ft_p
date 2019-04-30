@@ -6,7 +6,7 @@
 #    By: maki <maki@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/23 22:00:58 by ysan-seb          #+#    #+#              #
-#    Updated: 2019/04/30 19:06:42 by ysan-seb         ###   ########.fr        #
+#    Updated: 2019/04/30 19:25:32 by ysan-seb         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -71,7 +71,7 @@ $(C_NAME):$(C_OBJS)
 $(S_NAME):$(S_OBJS)
 	$(CC) $(FLAGS) -o $(S_NAME) $(S_OBJS) $(HEADER) $(LIBFT)
 
-%.o: %.c ./inc/ft_p.h ./inc/libft.h
+%.o: %.c ./inc/ft_p.h ./inc/libft.h ./inc/libftprintf.h
 	gcc $(FLAGS) -o $@ -c  $< $(HEADER)
 
 clean	:

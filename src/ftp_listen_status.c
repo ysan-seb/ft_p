@@ -16,10 +16,10 @@ int		ftp_listen_status(int sock)
 {
 	char	status[3];
 
-	memset(&status, 0, 3);
+	ft_memset(&status, 0, 3);
 	if (recv(sock, status, 2, 0) < 0)
 		error("Error with recv.\n");
-	if (strcmp(status, "OK") == 0)
+	if (ft_strcmp(status, "OK") == 0)
 		return (1);
 	return (0);
 }

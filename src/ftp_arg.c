@@ -17,9 +17,9 @@ int		arg(char *cmd)
 	int		i;
 
 	i = 0;
-	while (cmd[i] && !isblank(cmd[i]))
+	while (cmd[i] && !ft_isspace(cmd[i]))
 		i++;
-	while (cmd[i] && isblank(cmd[i]))
+	while (cmd[i] && ft_isspace(cmd[i]))
 		i++;
 	return (i);
 }

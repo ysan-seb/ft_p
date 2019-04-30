@@ -14,10 +14,10 @@
 
 int		local_command(int sock, t_cmd cmd)
 {
-	if (strcmp(cmd.str, "quit\n") == 0)
+	if (ft_strcmp(cmd.str, "quit\n") == 0)
 	{
 		send(sock, "quit\n", 5, 0);
-		printf("\e[3mDisconnected from server.\e[0m\n");
+		ft_printf("\e[3mDisconnected from server.\e[0m\n");
 		close(sock);
 		exit(EXIT_SUCCESS);
 	}

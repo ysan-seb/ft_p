@@ -14,7 +14,7 @@
 
 void	ftp_send_msg(int client_socket, char *msg)
 {
-	if (send(client_socket, msg, strlen(msg), 0) < 0)
+	if (send(client_socket, msg, ft_strlen(msg), 0) < 0)
 		error("Error with send.\n");
 	return ;
 }
@@ -23,7 +23,7 @@ void	ftp_cd_home(int client_socket, t_cmd cmd)
 {
 	if (chdir(cmd.home) < 0)
 		error("Error with chdir.\n");
-	if (send(client_socket, CD_SUCCESS, strlen(CD_SUCCESS), 0) < 0)
+	if (send(client_socket, CD_SUCCESS, ft_strlen(CD_SUCCESS), 0) < 0)
 		error("Error with send.\n");
 	return ;
 }
@@ -35,24 +35,24 @@ void	command_cd(int client_socket, t_cmd cmd)
 	char		new_path[PATH_MAX];
 	static char	old_path[PATH_MAX];
 
-	if (!strlen(old_path))
+	if (!ft_strlen(old_path))
 		getcwd(old_path, PATH_MAX);
-	if (strcmp(cmd.str, "cd") == 0)
+	if (ft_strcmp(cmd.str, "cd") == 0)
 		return (ftp_cd_home(client_socket, cmd));
 	i = arg(cmd.str);
 	getcwd(path, PATH_MAX);
 	if (chdir(cmd.str + i) < 0)
 		return (ftp_send_msg(client_socket, CD_INV_ARG));
 	getcwd(new_path, PATH_MAX);
-	if (!strstr(new_path, cmd.home))
+	if (!ft_strstr(new_path, cmd.home))
 	{
-		send(client_socket, CD_INV_DEST, strlen(CD_INV_DEST), 0);
+		send(client_socket, CD_INV_DEST, ft_strlen(CD_INV_DEST), 0);
 		chdir(path);
 		return ;
 	}
 	else
 	{
 		strcpy(old_path, path);
-		send(client_socket, CD_SUCCESS, strlen(CD_SUCCESS), 0);
+		send(client_socket, CD_SUCCESS, ft_strlen(CD_SUCCESS), 0);
 	}
 }

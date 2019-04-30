@@ -23,15 +23,15 @@ int		create_server(int port)
 		return (-1);
 	if ((sock = socket(PF_INET, SOCK_STREAM, proto->p_proto)) < 0)
 		error("[\e[38;5;1m-\e[0m]Error in connection.\n");
-	printf("[\e[38;5;2m+\e[0m]Server socket is created.\n");
+	ft_printf("[\e[38;5;2m+\e[0m]Server socket is created.\n");
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);
 	if (bind(sock, (const struct sockaddr *)&sin, sizeof(sin)) < 0)
 		error("[\e[38;5;1m-\e[0m]Error in binding.\n");
-	printf("[\e[38;5;2m+\e[0m]Bind to port %d.\n", port);
+	ft_printf("[\e[38;5;2m+\e[0m]Bind to port %d.\n", port);
 	if (listen(sock, 42) == 0)
-		printf("Listening ...\n");
+		ft_printf("Listening ...\n");
 	else
 		error("[\e[38;5;1m-\e[0m]Error in binding.\n");
 	return (sock);
@@ -49,7 +49,7 @@ int		command_put(int sock, t_cmd cmd)
 	while ((size = recv(sock, buff, 1023, 0)) > 0 && size != -1)
 	{
 		write(file.fd, buff, size);
-		memset(&buff, 0, 1024);
+		ft_memset(&buff, 0, 1024);
 		if (size == 1023)
 			continue;
 		else
@@ -69,20 +69,20 @@ int		builtins(int client_socket, t_cmd cmd)
 {
 	if (cmd.str[cmd.len - 1] == '\n')
 		cmd.str[cmd.len - 1] = '\0';
-	if (strcmp(cmd.str, "cd") == 0 || strncmp(cmd.str, "cd ", 3) == 0)
+	if (ft_strcmp(cmd.str, "cd") == 0 || ft_strncmp(cmd.str, "cd ", 3) == 0)
 		command_cd(client_socket, cmd);
-	else if (strcmp(cmd.str, "ls") == 0 || strncmp(cmd.str, "ls ", 3) == 0)
+	else if (ft_strcmp(cmd.str, "ls") == 0 || ft_strncmp(cmd.str, "ls ", 3) == 0)
 		command_ls(client_socket, cmd);
-	else if (strcmp(cmd.str, "pwd") == 0)
+	else if (ft_strcmp(cmd.str, "pwd") == 0)
 		command_pwd(client_socket);
-	else if (strcmp(cmd.str, "put") == 0 || strncmp(cmd.str, "put ", 4) == 0)
+	else if (ft_strcmp(cmd.str, "put") == 0 || ft_strncmp(cmd.str, "put ", 4) == 0)
 		command_put(client_socket, cmd);
-	else if (strcmp(cmd.str, "get") == 0 || strncmp(cmd.str, "get ", 4) == 0)
+	else if (ft_strcmp(cmd.str, "get") == 0 || ft_strncmp(cmd.str, "get ", 4) == 0)
 		command_get(client_socket, cmd);
-	else if (strcmp(cmd.str, "quit") == 0)
+	else if (ft_strcmp(cmd.str, "quit") == 0)
 		command_quit(client_socket);
 	else
-		send(client_socket, CMD_ERROR, strlen(CMD_ERROR), 0);
+		send(client_socket, CMD_ERROR, ft_strlen(CMD_ERROR), 0);
 	return (0);
 }
 
@@ -93,7 +93,7 @@ int		main(int ac, char **av)
 
 	if (ac != 2)
 		usage(av[0]);
-	port = atoi(av[1]);
+	port = ft_atoi(av[1]);
 	if ((sock = create_server(port)) < 0)
 		return (-1);
 	signal(SIGCHLD, ftp_signal);

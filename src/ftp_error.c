@@ -14,6 +14,6 @@
 
 void	error(char *err)
 {
-	dprintf(2, "%s", err);
+	ft_dprintf(2, "%s", err);
 	exit(-1);
 }

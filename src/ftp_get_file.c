@@ -17,11 +17,11 @@ char	*filename(char *cmd)
 	char	*chr;
 	char	*filename;
 
-	chr = strrchr(cmd, '/');
+	chr = ft_strrchr(cmd, '/');
 	if (!chr)
 		filename = cmd;
 	else
-		filename = cmd + (strlen(cmd) - strlen(chr)) + 1;
+		filename = cmd + (ft_strlen(cmd) - ft_strlen(chr)) + 1;
 	return (filename);
 }
 
@@ -32,7 +32,7 @@ int		ftp_get_file_size(int sock)
 
 	if (recv(sock, conv, 64, 0) < 0)
 		error("Error with recv.\n");
-	size = atoi(conv);
+	size = ft_atoi(conv);
 	return (size);
 }
 

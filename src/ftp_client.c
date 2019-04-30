@@ -22,7 +22,7 @@
 
 int		ftp_output(char *msg, int ret)
 {
-	printf("%s", msg);
+	ft_printf("%s", msg);
 	return (ret);
 }
 
@@ -37,16 +37,16 @@ int		create_client(char *addr, int port)
 		return (-1);
 	if ((sock = socket(PF_INET, SOCK_STREAM, proto->p_proto)) < 0)
 		error("[\e[38;5;1mERROR\e[0m] Error in connection.");
-	printf("[\e[38;5;2mSUCCESS\e[0m] Client socket is created.\n");
+	ft_printf("[\e[38;5;2mSUCCESS\e[0m] Client socket is created.\n");
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
-	if (strcmp(addr, "localhost") == 0)
+	if (ft_strcmp(addr, "localhost") == 0)
 		sin.sin_addr.s_addr = inet_addr("127.0.0.1");
 	else
 		sin.sin_addr.s_addr = inet_addr(addr);
 	if (connect(sock, (const struct sockaddr *)&sin, sizeof(sin)) < 0)
 		error("[\e[38;5;1mERROR\e[0m] Error in connection.");
-	printf("[\e[38;5;2mSUCCESS\e[0m] Connected to Server.\n");
+	ft_printf("[\e[38;5;2mSUCCESS\e[0m] Connected to Server.\n");
 	return (sock);
 }
 
@@ -56,7 +56,7 @@ int		ftp_get(int sock, t_cmd cmd)
 	struct stat	st;
 	void		*ptr;
 
-	if (strcmp(cmd.str, "put") == 0 || strlen(cmd.str + arg(cmd.str)) == 0)
+	if (ft_strcmp(cmd.str, "put") == 0 || ft_strlen(cmd.str + arg(cmd.str)) == 0)
 		return (ftp_output(MISSING_ARG, -1));
 	if ((fd = open(cmd.str + arg(cmd.str), O_RDONLY)) < 0)
 		return (ftp_output(OPEN_ERROR, -1));
@@ -86,7 +86,7 @@ int		main(int ac, char **av)
 
 	if (ac != 3)
 		usage(av[0]);
-	port = atoi(av[2]);
+	port = ft_atoi(av[2]);
 	if ((sock = create_client(av[1], port)) < 0)
 		return (-1);
 	while (1)

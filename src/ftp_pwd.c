@@ -17,11 +17,11 @@ void	command_pwd(int client_socket)
 	char	path[PATH_MAX];
 
 	getcwd(path, PATH_MAX);
-	if (strlen(path) == 0)
-		send(client_socket, PWD_ERROR, strlen(PWD_ERROR), 0);
+	if (ft_strlen(path) == 0)
+		send(client_socket, PWD_ERROR, ft_strlen(PWD_ERROR), 0);
 	else
 	{
-		send(client_socket, path, strlen(path), 0);
-		send(client_socket, PWD_SUCCESS, strlen(PWD_SUCCESS), 0);
+		send(client_socket, path, ft_strlen(path), 0);
+		send(client_socket, PWD_SUCCESS, ft_strlen(PWD_SUCCESS), 0);
 	}
 }

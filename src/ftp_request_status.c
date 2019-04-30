@@ -14,7 +14,7 @@
 
 int		ftp_request_status(int sock, char *status, int ret)
 {
-	if (send(sock, status, strlen(status), 0) < 0)
+	if (send(sock, status, ft_strlen(status), 0) < 0)
 		error("Error with send.\n");
 	return (ret);
 }

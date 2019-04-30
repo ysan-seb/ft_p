@@ -6,13 +6,15 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/27 13:33:36 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/30 17:41:55 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/30 19:25:58 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_P_H
 # define FT_P_H
 
+# include "libft.h"
+# include "libftprintf.h"
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>

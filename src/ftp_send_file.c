@@ -22,16 +22,16 @@ int		ftp_check_file_path(int sock, t_cmd cmd)
 
 	ret = 0;
 	path = cmd.str + arg(cmd.str);
-	chr = strrchr(path, '/');
+	chr = ft_strrchr(path, '/');
 	if (chr)
-		path[strlen(path) - strlen(chr)] = 0;
+		path[ft_strlen(path) - ft_strlen(chr)] = 0;
 	else
 		return (1);
 	getcwd(old_pwd, PATH_MAX);
 	if (chdir(path) < 0)
 		return (ftp_request_status(sock, ERROR, 0));
 	getcwd(new_pwd, PATH_MAX);
-	if (strstr(new_pwd, cmd.home))
+	if (ft_strstr(new_pwd, cmd.home))
 		ret = 1;
 	else
 		ret = 0;
@@ -48,8 +48,8 @@ size_t	ftp_send_file_size(int sock, int fd)
 
 	if (fstat(fd, &st) < 0)
 		error("Error with fstat");
-	sprintf(conv, "%lld", st.st_size);
-	if (send(sock, conv, strlen(conv), 0) < 0)
+	ft_sprintf(conv, "%lld", st.st_size);
+	if (send(sock, conv, ft_strlen(conv), 0) < 0)
 		error("Error while sending status.");
 	return (st.st_size);
 }
@@ -74,7 +74,7 @@ int		ftp_send_file(int sock, t_cmd cmd)
 	int		fd;
 	size_t	file_size;
 
-	if (strcmp(cmd.str, "get") == 0 || strlen(cmd.str + arg(cmd.str)) == 0)
+	if (ft_strcmp(cmd.str, "get") == 0 || ft_strlen(cmd.str + arg(cmd.str)) == 0)
 	{
 		ftp_request_status(sock, ERROR, 0);
 		return (ftp_request_status(sock, MISSING_ARG, -1));
