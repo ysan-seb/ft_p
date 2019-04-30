@@ -38,7 +38,7 @@ static t_cmd	command(int sock)
 
 static int		send_command(int sock, t_cmd cmd)
 {
-	if (strncmp("put", cmd.str, 3) == 0)
+	if (strcmp(cmd.str, "put") == 0 || strncmp(cmd.str, "put ", 4) == 0)
 	{
 		cmd.str[cmd.len - 1] = 0;
 		return (ftp_get(sock, cmd));
@@ -50,7 +50,7 @@ static int		send_command(int sock, t_cmd cmd)
 			close(sock);
 			exit(EXIT_SUCCESS);
 		}
-		if (strncmp("get", cmd.str, 3) == 0)
+		if (strcmp(cmd.str, "get") == 0 || strncmp(cmd.str, "get ", 4) == 0)
 			ftp_get_file(sock, cmd);
 	}
 	return (0);
@@ -73,7 +73,7 @@ int				ftp_client(int sock)
 			{
 				write(1, cmd.str, cmd.len);
 				if (strstr(cmd.str, "SUCCESS") || strstr(cmd.str, "ERROR"))
-					return (0);
+					break ;
 			}
 		}
 	}

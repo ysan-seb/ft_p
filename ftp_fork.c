@@ -32,7 +32,6 @@ int		ftp_fork(int sock)
 				return (0);
 			}
 			cmd.str[cmd.len] = '\0';
-			printf("%s\n", cmd.str);
 			builtins(c.cs, cmd);
 		}
 	}

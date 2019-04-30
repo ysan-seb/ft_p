@@ -69,15 +69,15 @@ int		builtins(int client_socket, t_cmd cmd)
 {
 	if (cmd.str[cmd.len - 1] == '\n')
 		cmd.str[cmd.len - 1] = '\0';
-	if (strncmp(cmd.str, "cd", 2) == 0)
+	if (strcmp(cmd.str, "cd") == 0 || strncmp(cmd.str, "cd ", 3) == 0)
 		command_cd(client_socket, cmd);
-	else if (strncmp(cmd.str, "ls", 2) == 0)
+	else if (strcmp(cmd.str, "ls") == 0 || strncmp(cmd.str, "ls ", 3) == 0)
 		command_ls(client_socket, cmd);
 	else if (strcmp(cmd.str, "pwd") == 0)
 		command_pwd(client_socket);
-	else if (strncmp(cmd.str, "put", 3) == 0)
+	else if (strcmp(cmd.str, "put") == 0 || strncmp(cmd.str, "put ", 4) == 0)
 		command_put(client_socket, cmd);
-	else if (strncmp(cmd.str, "get", 3) == 0)
+	else if (strcmp(cmd.str, "get") == 0 || strncmp(cmd.str, "get ", 4) == 0)
 		command_get(client_socket, cmd);
 	else if (strcmp(cmd.str, "quit") == 0)
 		command_quit(client_socket);
