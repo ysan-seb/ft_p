@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/29 20:30:31 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/30 02:35:52 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include "ft_p.h"
-
-#define BUFF_SIZE 1024
 
 int		create_client(char *addr, int port)
 {
@@ -66,8 +64,26 @@ t_cmd	command(int sock)
 	}
 }
 
-void	send_command(int sock, t_cmd cmd)
+// size_t	ftp_send_file_size(int sock, int fd)
+// {
+// 	struct stat	st;
+// 	char		conv[64];
+
+// 	if (fstat(fd, &st) < 0)
+// 		error("Error with fstat");
+// 	sprintf(conv, "%ld", st.st_size);
+// 	if (send(sock, conv, strlen(conv), 0) < 0)
+// 		error("Error while sending status.");
+// 	return (st.st_size);
+// }
+ 
+int	send_command(int sock, t_cmd cmd)
 {
+	t_file file;
+	struct stat st;		
+	int			size;
+	char		buff[BUFF_SIZE];
+	
 	if (send(sock, cmd.str, cmd.len, 0) < 0)
 	{
 		close(sock);
@@ -76,7 +92,23 @@ void	send_command(int sock, t_cmd cmd)
 	if (strncmp("get", cmd.str, 3) == 0)
 		ftp_get_file(sock, cmd);
 	if (strncmp("put", cmd.str, 3) == 0)
-		ftp_send_file(sock, cmd);
+	{
+		cmd.str[cmd.len - 1] = 0;
+		if ((file.fd = ftp_open_file(sock, cmd)) < 0)
+			return printf("%s", OPEN_ERROR);
+		if (fstat(file.fd, &st) < 0)
+			error("Error with stat");
+		file.size = st.st_size;		
+		printf("%zu %d\n", file.size, file.fd);
+
+		while ((size = read(file.fd, buff, BUFF_SIZE - 1)) && size != -1)
+		{
+			send(sock, buff, size, 0);
+			memset(buff, 0, BUFF_SIZE);
+		}
+		close(file.fd);
+	}
+	return (0);
 }
 
 int		main(int ac, char **av)

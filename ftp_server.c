@@ -6,19 +6,11 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/29 20:17:48 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/30 02:40:56 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
-
-#define CMD_ERROR "[\e[38;5;1mERROR\e[0m] Invalid command.\n"
-#define GET_OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Error with open.\n"
-#define GET_MMAP_ERROR "[\e[38;5;1mERROR\e[0m] Error with mmap.\n"
-#define GET_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
-#define FALSE "0"
-#define TRUE "1"
-#define BUFF_SIZE 1024
 
 int		create_server(int port)
 {
@@ -45,11 +37,43 @@ int		create_server(int port)
 	return (sock);
 }
 
-void	command_put(int client_socket, t_cmd cmd)
+int		command_put(int sock, t_cmd cmd)
 {
-	printf("->\n");
-	ftp_get_file(client_socket, cmd);
-	printf("<-\n");
+	(void)cmd;
+	(void)sock;
+	// struct stat st;
+	// t_file 		file;
+		// char		*path;
+	char		buff[BUFF_SIZE];
+	int			size;
+	
+		if (!ftp_get_file_header(sock))
+			return ftp_request_status(sock, "ERROR command put aborted.\n", 0);
+		printf("filename\n");
+		printf("create file\n");
+		printf("fill with file content\n");
+		printf("send status\n");
+		size_t	tmp;
+
+		tmp = 0;
+		while ((size = recv(sock, buff, BUFF_SIZE - 1, 0)) && size != -1)
+		{
+			tmp += size;
+			write(1, buff, size);
+			// if (tmp == file.size)
+			// 	break ;
+		}
+		
+		
+	
+
+	// filename
+	// destination
+	// content
+	
+
+
+	return ftp_request_status(sock, "SUCCESS command put has been executed.\n", 0);
 }
 
 void	command_get(int client_socket, t_cmd cmd)

@@ -3,17 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ftp_ls.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/27 14:19:39 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/27 14:21:13 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/29 23:55:18 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
-
-#define LS_ERROR "[\e[38;5;1mERROR\e[0m] Invalid argument.\n"
-#define LS_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] Directory has been listed.\n"
 
 void	command_ls(int client_socket, t_cmd cmd)
 {

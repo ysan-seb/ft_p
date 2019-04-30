@@ -1,27 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ftp_send_file_header.c                             :+:      :+:    :+:   */
+/*   ftp_send_file.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/29 17:41:02 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/29 17:44:13 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/29 23:59:00 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_p.h"
-
-#define MISSING_ARG "[\e[38;5;1mERROR\e[0m] Argument is missing.\n"
-#define INVALID_PATH_FILE "[\e[38;5;1mERROR\e[0m] Invalid path file.\n"
-#define OPEN_ERROR "[\e[38;5;1mERROR\e[0m] Can't open file.\n"
-#define FSTAT_ERROR "[\e[38;5;1mERROR\e[0m] Error with fstat.\n"
-#define IS_DIR "[\e[38;5;1mERROR\e[0m] Is a directory.\n"
-#define IS_SYM "[\e[38;5;1mERROR\e[0m] Is a symlink.\n"
-#define ERROR "0"
-#define SUCCESS "1"
-#define SENDING_SUCCESS "[\e[38;5;2mSUCCESS\e[0m] File has been send.\n"
-#define BUFF_SIZE 1024
 
 int		ftp_check_file_path(int sock, t_cmd cmd)
 {
@@ -52,24 +41,6 @@ int		ftp_check_file_path(int sock, t_cmd cmd)
 	return (ret);
 }
 
-int		ftp_open_file(int sock, t_cmd cmd)
-{
-	int			fd;
-	struct stat	st;
-	char		*path;
-
-	path = cmd.str + arg(cmd.str);
-	if ((fd = open(path, O_RDONLY)) < 0)
-		return (ftp_request_status(sock, ERROR, -1));
-	if (fstat(fd, &st) < 0)
-		return (ftp_request_status(sock, ERROR, -1));
-	if ((st.st_mode & S_IFMT) == S_IFDIR)
-		return (ftp_request_status(sock, ERROR, -1));
-	if ((st.st_mode & S_IFMT) == S_IFLNK)
-		return (ftp_request_status(sock, ERROR, -1));
-	return (fd);
-}
-
 size_t	ftp_send_file_size(int sock, int fd)
 {
 	struct stat	st;
@@ -77,7 +48,7 @@ size_t	ftp_send_file_size(int sock, int fd)
 
 	if (fstat(fd, &st) < 0)
 		error("Error with fstat");
-	sprintf(conv, "%lld", st.st_size);
+	sprintf(conv, "%ld", st.st_size);
 	if (send(sock, conv, strlen(conv), 0) < 0)
 		error("Error while sending status.");
 	return (st.st_size);

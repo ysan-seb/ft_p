@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ftp_get_file.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysan-seb <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/29 18:06:54 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/29 18:44:43 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/30 00:03:34 by maki             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,6 @@ char	*filename(char *cmd)
 	else
 		filename = cmd + (strlen(cmd) - strlen(chr)) + 1;
 	return (filename);
-}
-
-int		ftp_get_file_header(int sock)
-{
-	char	status[1];
-
-	if (recv(sock, status, 1, 0) < 0)
-		error("Error with recv.\n");
-	if (status[0] == '0')
-		return (0);
-	return (1);
 }
 
 int		ftp_get_file_size(int sock)

@@ -6,7 +6,7 @@
 #    By: maki <maki@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/23 22:00:58 by ysan-seb          #+#    #+#              #
-#    Updated: 2019/04/29 00:57:56 by maki             ###   ########.fr        #
+#    Updated: 2019/04/30 00:04:39 by maki             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,8 +20,10 @@ C_SRCS = ftp_client.c \
 		 ftp_local_command.c \
 		 ftp_get_file.c \
 		 ftp_send_file.c \
+		 ftp_open_file.c \
 		 ftp_request_status.c \
 		 ftp_listen_status.c \
+		 ftp_get_file_header.c \
 		 ftp_quit.c \
 
 
@@ -34,8 +36,10 @@ S_SRCS = ftp_server.c \
 		 ftp_pwd.c \
 		 ftp_get_file.c \
 		 ftp_send_file.c \
+		 ftp_open_file.c \
 		 ftp_request_status.c \
 		 ftp_listen_status.c \
+		 ftp_get_file_header.c \
 		 ftp_quit.c \
 
 C_OBJS = $(C_SRCS:.c=.o)
