@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:48:04 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/30 18:14:20 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/30 19:34:24 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ int		ftp_get(int sock, t_cmd cmd)
 	struct stat	st;
 	void		*ptr;
 
-	if (ft_strcmp(cmd.str, "put") == 0 || ft_strlen(cmd.str + arg(cmd.str)) == 0)
+	if (!ft_strcmp(cmd.str, "put") || ft_strlen(cmd.str + arg(cmd.str)) == 0)
 		return (ftp_output(MISSING_ARG, -1));
 	if ((fd = open(cmd.str + arg(cmd.str), O_RDONLY)) < 0)
 		return (ftp_output(OPEN_ERROR, -1));

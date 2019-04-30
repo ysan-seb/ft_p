@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/23 21:49:33 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/30 18:26:28 by ysan-seb         ###   ########.fr       */
+/*   Updated: 2019/04/30 19:36:30 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,17 +69,17 @@ int		builtins(int client_socket, t_cmd cmd)
 {
 	if (cmd.str[cmd.len - 1] == '\n')
 		cmd.str[cmd.len - 1] = '\0';
-	if (ft_strcmp(cmd.str, "cd") == 0 || ft_strncmp(cmd.str, "cd ", 3) == 0)
+	if (!ft_strcmp(cmd.str, "cd") || !ft_strncmp(cmd.str, "cd ", 3))
 		command_cd(client_socket, cmd);
-	else if (ft_strcmp(cmd.str, "ls") == 0 || ft_strncmp(cmd.str, "ls ", 3) == 0)
+	else if (!ft_strcmp(cmd.str, "ls") || !ft_strncmp(cmd.str, "ls ", 3))
 		command_ls(client_socket, cmd);
-	else if (ft_strcmp(cmd.str, "pwd") == 0)
+	else if (!ft_strcmp(cmd.str, "pwd"))
 		command_pwd(client_socket);
-	else if (ft_strcmp(cmd.str, "put") == 0 || ft_strncmp(cmd.str, "put ", 4) == 0)
+	else if (!ft_strcmp(cmd.str, "put") || !ft_strncmp(cmd.str, "put ", 4))
 		command_put(client_socket, cmd);
-	else if (ft_strcmp(cmd.str, "get") == 0 || ft_strncmp(cmd.str, "get ", 4) == 0)
+	else if (!ft_strcmp(cmd.str, "get") || !ft_strncmp(cmd.str, "get ", 4))
 		command_get(client_socket, cmd);
-	else if (ft_strcmp(cmd.str, "quit") == 0)
+	else if (!ft_strcmp(cmd.str, "quit"))
 		command_quit(client_socket);
 	else
 		send(client_socket, CMD_ERROR, ft_strlen(CMD_ERROR), 0);

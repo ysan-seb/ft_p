@@ -6,7 +6,7 @@
 /*   By: maki <maki@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/29 17:41:02 by ysan-seb          #+#    #+#             */
-/*   Updated: 2019/04/29 23:59:00 by maki             ###   ########.fr       */
+/*   Updated: 2019/04/30 19:34:47 by ysan-seb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ int		ftp_send_file(int sock, t_cmd cmd)
 	int		fd;
 	size_t	file_size;
 
-	if (ft_strcmp(cmd.str, "get") == 0 || ft_strlen(cmd.str + arg(cmd.str)) == 0)
+	if (!ft_strcmp(cmd.str, "get") || ft_strlen(cmd.str + arg(cmd.str)) == 0)
 	{
 		ftp_request_status(sock, ERROR, 0);
 		return (ftp_request_status(sock, MISSING_ARG, -1));
