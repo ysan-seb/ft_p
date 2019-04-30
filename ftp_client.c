@@ -34,7 +34,7 @@ int		create_client(char *addr, int port)
 	printf("[\e[38;5;2mSUCCESS\e[0m] Client socket is created.\n");
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
-	sin.sin_addr.s_addr = inet_addr(addr);
+	sin.sin_addr.s_addr = inet_addr(strcmp(addr, "localhost") == 0 ? "127.0.0.1" : addr);
 	if (connect(sock, (const struct sockaddr *)&sin, sizeof(sin)) < 0)
 		error("[\e[38;5;1mERROR\e[0m] Error in connection.");
 	printf("[\e[38;5;2mSUCCESS\e[0m] Connected to Server.\n");
